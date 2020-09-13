@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Outdoors</string>
+
+    <string name="signUpText">Don\'t have an account?</string>
+    <string name="logInText">Log In</string>
+    <string name="logInGoogleText">Log In with Google</string>
+
+    <string name="emailEditHint">E-Mail address</string>
+    <string name="usernameEditHint">Username</string>
+    <string name="passwordEditHint">Password</string>
+    <string name="passwordConfirmEditHint">Confirm Password</string>
+
+    <string name="signUpSubmit">Sign Up</string>
+    <string name="signUpFNameEdit">First Name</string>
+    <string name="signUpLNameEdit">Last Name</string>
+    <string name="signUpPhoneEdit">Phone Number</string>
+</resources>

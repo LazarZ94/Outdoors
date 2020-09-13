@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "577750730858",
+    "firebase_url": "https://outdoors-9ce72.firebaseio.com",
+    "project_id": "outdoors-9ce72",
+    "storage_bucket": "outdoors-9ce72.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577750730858:android:26977e0bc875997926e213",
+        "android_client_info": {
+          "package_name": "com.example.outdoors"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "577750730858-mvpi86k50931tafsvehlcn0eur3eamcr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.outdoors",
+            "certificate_hash": "12cfea7984ac824bdd11f9aa742dfc24b1c238b9"
+          }
+        },
+        {
+          "client_id": "577750730858-hnb78dlt3dq0i9i0c0d69bf0ut84i0eo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1mEkjrMao4HKtXSBOYd6E_GM6gO7cLRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "577750730858-hnb78dlt3dq0i9i0c0d69bf0ut84i0eo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
