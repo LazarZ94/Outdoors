@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         userInst = UserAuthentication.getInstance();
 
-        mAuth = userInst.getAuth();
+        mAuth = DBAuth.getInstance().getAuth();
 
         String webClient = getString(R.string.default_web_client_id);
         userInst.setGoogleSignInClient(this, webClient);
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         //IF ALLREADY SIGNED IN account != null
         FirebaseUser currUser = mAuth.getCurrentUser();
+        Log.d(TAG, "CURRENT USER MAINACT PRVI PUT" + currUser);
         UserAuthentication.getInstance().setUserAndUpdate(currUser, this);
     }
 
@@ -151,9 +152,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //TODO LOGIN USERNAME VALIDACIJA
+    //TODO KONFLIKT ZA GOOGLE LOGIN USERNAME (WHILE TREBA)
     //TODO FJE I IZGLED
     //TODO LAYOUT ZA INPUT FIELD I ERRMSG ZA SIGNUP
     //TODO VALIDACIJA BROJA TELEFONA I AUTOFILL
+
+    //TODO HASHMAP ZA ALLUSERS, FRIENDLIST SA REF I NEKI CONFIRM
+    //TODO REFACTOR USERDB I DA IDE KROZ USERLIST SVE
+    //TODO USERPROFILE STRANA I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
+    //TODO GET FRIEND LISTS FROM DB
+
+    //TODO POPRAVI EXCLUDE ZA LISTE I IMG
+
+    //TODO REFACTOR SVE ZA BAZU DA BUDE JEDNA KLASA AUTH I USERLIST DA KORISTE AUTH IDE PREKO UL
+
+    //TODO MAIL CONFIRM, INFO RECOVERY
 
 }

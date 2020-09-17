@@ -35,15 +35,21 @@ public class UserAuthentication {
     private GoogleSignInClient mGoogleSignInClient;
 
     private UserAuthentication(){
-        mAuth = FirebaseAuth.getInstance();
+        mAuth = DBAuth.getInstance().getAuth();
         currentUserFB = mAuth.getCurrentUser();
-        db = FirebaseFirestore.getInstance();
+        db = DBAuth.getInstance().getDB();
     }
 
-    public void setUserAndUpdate(FirebaseUser user, AppCompatActivity context){
-        final FirebaseUser usr = user;
-        final AppCompatActivity cntx = context;
+    public void setUserAndUpdate(final FirebaseUser user, final AppCompatActivity context){
         if(user!=null) {
+            /*UserList userList = UserList.getInstance();
+            if(userList.userExists(user.getUid())) {
+                currentUser = userList.getUser(user.getUid());
+                updateUI(context, user);
+            }else{
+                currentUser = addNewGoogleUser(user);
+                updateUI(context,user);
+            }*/
             String uid = user.getUid();
             DocumentReference userRef = db.collection("users").document(uid);
             userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -52,11 +58,13 @@ public class UserAuthentication {
                     if(documentSnapshot.getData()!=null) {
                         Log.d(TAG, "Current user is " + documentSnapshot.getData());
                         currentUser = documentSnapshot.toObject(User.class);
+                        UserList.getInstance().setFriends(currentUser, user.getUid());
+                        //UserList.getInstance().updateUsers();
                         Log.d(TAG, "POSLE POSTAVLJANJA user je " + currentUser.getUsername());
-                        updateUI(cntx, usr);
+                        updateUI(context, user);
                     }else{
-                        currentUser = addNewGoogleUser(usr);
-                        updateUI(cntx,usr);
+                        currentUser = addNewGoogleUser(user);
+                        updateUI(context, user);
                     }
                 }
             });
@@ -83,7 +91,6 @@ public class UserAuthentication {
 
 
     public void setGoogleSignInClient(AppCompatActivity context, String webClient){
-        //String webClient = Resources.getSystem().getString(R.string.default_web_client_id);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(webClient)
                 .requestProfile()
@@ -106,13 +113,6 @@ public class UserAuthentication {
         return SingletonHolder.instance;
     }
 
-    public FirebaseAuth getAuth(){
-        return mAuth;
-    }
-
-    public FirebaseFirestore getDB(){
-        return db;
-    }
 
     public User getCurrentUser(){
         return currentUser;

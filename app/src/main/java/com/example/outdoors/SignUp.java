@@ -72,8 +72,8 @@ public class SignUp extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         setUpViewPager(mViewPager);
 
-        mAuth = UserAuthentication.getInstance().getAuth();
-        db = UserAuthentication.getInstance().getDB();
+        mAuth = DBAuth.getInstance().getAuth();
+        db = DBAuth.getInstance().getDB();
 
     }
 

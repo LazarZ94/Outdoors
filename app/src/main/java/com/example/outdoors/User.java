@@ -5,6 +5,8 @@ import android.net.Uri;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.firestore.Exclude;
 
+import java.util.ArrayList;
+
 @IgnoreExtraProperties
 public class User {
     public String email;
@@ -12,8 +14,10 @@ public class User {
     public String fName;
     public String lName;
     public String phoneNumber;
-    @Exclude
-    public Uri img;
+    @Exclude public final ArrayList<String> friends = new ArrayList<>();
+    @Exclude public final ArrayList<String> friendRequests = new ArrayList<>();
+    @Exclude public final ArrayList<String> sentFriendRequests = new ArrayList<>();
+    @Exclude public Uri img;
 
     public User(){
 
@@ -25,9 +29,29 @@ public class User {
         this.fName = fName;
         this.lName = lName;
         this.phoneNumber = phone;
+        //this.friends = new ArrayList<>();
+        //this.friendRequests = new ArrayList<>();
+        //this.sentFriendRequests = new ArrayList<>();
         this.img = null;
     }
 
+    @Override
+    public String toString(){
+        return username;
+    }
+
+
+    public ArrayList<String> getFriends(){
+        return friends;
+    }
+
+    public ArrayList<String> getFriendRequests(){
+        return friendRequests;
+    }
+
+    public ArrayList<String> getSentFriendRequests(){
+        return sentFriendRequests;
+    }
 
     public String getUsername(){
         return username;
