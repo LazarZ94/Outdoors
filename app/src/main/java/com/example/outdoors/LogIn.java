@@ -99,15 +99,15 @@ public class LogIn extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Log.d(TAG, "LOG IN SUCCESS ");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            UserAuthentication inst = UserAuthentication.getInstance();
-                            inst.setUserAndUpdate(user, LogIn.this);
+                            UserList inst = UserList.getInstance();
+                            inst.updateUsers(LogIn.this);
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LogIn.this, "Log In failed", Toast.LENGTH_SHORT).show();
                             TextView pwErr = (TextView) findViewById(R.id.passwordLogInError);
                             String errMsg = "Wrong password";
                             pwErr.setText(errMsg);
-                            UserAuthentication.getInstance().updateUI(LogIn.this,null);
+                            UserList.getInstance().updateUI(LogIn.this,null);
                         }
                     }
                 });

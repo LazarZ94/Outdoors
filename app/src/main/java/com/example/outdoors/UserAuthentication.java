@@ -1,4 +1,4 @@
-package com.example.outdoors;
+/*package com.example.outdoors;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -42,14 +42,14 @@ public class UserAuthentication {
 
     public void setUserAndUpdate(final FirebaseUser user, final AppCompatActivity context){
         if(user!=null) {
-            /*UserList userList = UserList.getInstance();
+            UserList userList = UserList.getInstance();
             if(userList.userExists(user.getUid())) {
                 currentUser = userList.getUser(user.getUid());
                 updateUI(context, user);
             }else{
                 currentUser = addNewGoogleUser(user);
                 updateUI(context,user);
-            }*/
+            }
             String uid = user.getUid();
             DocumentReference userRef = db.collection("users").document(uid);
             userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -118,9 +118,9 @@ public class UserAuthentication {
         return currentUser;
     }
 
-    /*public void setCurrentUser(FirebaseUser currentUser) {
+    public void setCurrentUser(FirebaseUser currentUser) {
         this.currentUser = currentUser;
-    }*/
+    }
 
     public void updateUI(AppCompatActivity context, FirebaseUser user){
         if(user != null){
@@ -130,4 +130,4 @@ public class UserAuthentication {
             context.finish();
         }
     }
-}
+}*/

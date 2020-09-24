@@ -57,4 +57,15 @@
         android:text="TextView"
         tools:layout_editor_absoluteX="52dp"
         tools:layout_editor_absoluteY="654dp" />
+
+    <Button
+        android:id="@+id/btButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bluetooth"
+        app:layout_constraintBottom_toTopOf="@+id/mainScreenReuests"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.87"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

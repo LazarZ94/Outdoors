@@ -14,24 +14,24 @@ public class User {
     public String fName;
     public String lName;
     public String phoneNumber;
-    @Exclude public final ArrayList<String> friends = new ArrayList<>();
-    @Exclude public final ArrayList<String> friendRequests = new ArrayList<>();
-    @Exclude public final ArrayList<String> sentFriendRequests = new ArrayList<>();
+    public ArrayList<String> friends = new ArrayList<>();
+    public ArrayList<String> friendRequests = new ArrayList<>();
+    public ArrayList<String> sentFriendRequests = new ArrayList<>();
     @Exclude public Uri img;
 
     public User(){
 
     }
 
-    public User(String email, String username, String fName, String lName, String phone){
+    public User(String email, String username, String fName, String lName, String phone, ArrayList<String> friends, ArrayList<String> fReq,  ArrayList<String> sentFR){
         this.email = email;
         this.username = username;
         this.fName = fName;
         this.lName = lName;
         this.phoneNumber = phone;
-        //this.friends = new ArrayList<>();
-        //this.friendRequests = new ArrayList<>();
-        //this.sentFriendRequests = new ArrayList<>();
+        this.friends = new ArrayList<>(friends);
+        this.friendRequests = new ArrayList<>(fReq);
+        this.sentFriendRequests = new ArrayList<>(sentFR);
         this.img = null;
     }
 

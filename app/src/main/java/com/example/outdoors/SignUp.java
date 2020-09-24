@@ -27,6 +27,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class SignUp extends AppCompatActivity {
@@ -235,19 +236,20 @@ public class SignUp extends AppCompatActivity {
                             Log.w(TAG+" PRE POZIVA ADDUSER", "USERID = " + userFB.getUid());
                             String uid = userFB.getUid();
                             addNewUser(uid);
-                            UserAuthentication inst = UserAuthentication.getInstance();
-                            inst.setUserAndUpdate(userFB, SignUp.this);
+                            UserList inst = UserList.getInstance();
+                            inst.updateUsers(SignUp.this);
                         }else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(SignUp.this, "Error creating user", Toast.LENGTH_SHORT).show();
-                            UserAuthentication.getInstance().updateUI(SignUp.this,null);
+                            UserList.getInstance().updateUI(SignUp.this,null);
                         }
                     }
                 });
     }
 
     private void addNewUser(String uid){
-        User user = new User(email,username,fName,lName,phoneNumber);
+        ArrayList<String> emptyArr = new ArrayList<>();
+        User user = new User(email,username,fName,lName,phoneNumber, emptyArr, emptyArr, emptyArr);
         db.collection(COLLECTION)
                 .document(uid).set(user);
     }
