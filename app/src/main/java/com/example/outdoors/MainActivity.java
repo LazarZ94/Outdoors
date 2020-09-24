@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private GoogleSignInClient mGoogleSignInClient;
 
-    UserAuthentication userInst;
+    UserList userInst;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView signUpLink = (TextView) findViewById(R.id.signUp);
         signUpLink.setOnClickListener(this);
 
-        userInst = UserAuthentication.getInstance();
+        userInst = UserList.getInstance();
 
         mAuth = DBAuth.getInstance().getAuth();
 
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "GOOGLE SIGN IN SUCCESSFUL");
                     FirebaseUser userFB = mAuth.getCurrentUser();
                     Log.d(TAG, "USERFB ATTRS: " + userFB.getDisplayName() + userFB.getEmail());
-                    userInst.setUserAndUpdate(userFB, MainActivity.this);
+                    userInst.updateUsers(MainActivity.this);
                 }else{
                     Toast.makeText(MainActivity.this, "Sign in with google failed", Toast.LENGTH_SHORT).show();
                 }
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //IF ALLREADY SIGNED IN account != null
         FirebaseUser currUser = mAuth.getCurrentUser();
         Log.d(TAG, "CURRENT USER MAINACT PRVI PUT" + currUser);
-        UserAuthentication.getInstance().setUserAndUpdate(currUser, this);
+        UserList.getInstance().updateUsers(this);
     }
 
 
@@ -157,12 +157,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //TODO LAYOUT ZA INPUT FIELD I ERRMSG ZA SIGNUP
     //TODO VALIDACIJA BROJA TELEFONA I AUTOFILL
 
-    //TODO HASHMAP ZA ALLUSERS, FRIENDLIST SA REF I NEKI CONFIRM
-    //TODO REFACTOR USERDB I DA IDE KROZ USERLIST SVE
-    //TODO USERPROFILE STRANA I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
-    //TODO GET FRIEND LISTS FROM DB
+    //TODO LANDSCAPE
 
-    //TODO POPRAVI EXCLUDE ZA LISTE I IMG
+    //TODO REFACTOR USERDB I DA IDE KROZ USERLIST SVE I U LOGIN I SIGNUP
+    //TODO USERPROFILE STRANA I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
+
+    //TODO BT FRIEND ADD
+    //TODO PROVERI DA LI SU VEC PRIJATELJI
 
     //TODO REFACTOR SVE ZA BAZU DA BUDE JEDNA KLASA AUTH I USERLIST DA KORISTE AUTH IDE PREKO UL
 

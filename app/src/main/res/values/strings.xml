@@ -16,4 +16,9 @@
     <string name="signUpPhoneEdit">Phone Number</string>
 
     <string name="addFriend">Add As Friend</string>
+
+    <string name="OK">OK</string>
+
+    <string name="acceptBTReq">Accept</string>
+    <string name="cancel">Cancel</string>
 </resources>

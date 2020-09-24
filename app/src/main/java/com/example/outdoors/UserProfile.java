@@ -26,11 +26,14 @@ public class UserProfile extends AppCompatActivity {
 
     final static String TAG = "USERPROFILE";
 
+    User currUser;
     String userID;
     User user;
     ArrayList<User> userFriends;
     FirebaseFirestore db;
     final String currId = DBAuth.getInstance().getAuth().getCurrentUser().getUid();
+
+    final UserList userListInst = UserList.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +51,6 @@ public class UserProfile extends AppCompatActivity {
 
         db = DBAuth.getInstance().getDB();
 
-        final UserList userListInst = UserList.getInstance();
 
         user = userListInst.getUser(userID);
 
@@ -58,7 +60,7 @@ public class UserProfile extends AppCompatActivity {
             userFriends.add(userListInst.getUser(friendID));
         }
 
-        final User currUser = UserAuthentication.getInstance().getCurrentUser();
+        currUser = UserList.getInstance().getCurrentUser();
 
 
         final Button addButt = (Button) findViewById(R.id.userProfileAddFriend);
@@ -70,7 +72,7 @@ public class UserProfile extends AppCompatActivity {
         addButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!user.friendRequests.contains(currId)){
+                if(!user.friendRequests.contains(currId) && !currUser.friendRequests.contains(userID)){
                     Log.d(TAG, "USER ID JE " + userID);
                     Log.d(TAG, "CURRENT ID JE " + currId);
                     /*Map<String, Object> currAdd = new HashMap<>();
@@ -103,7 +105,7 @@ public class UserProfile extends AppCompatActivity {
                             });*/
                     setRequests();
                     addButt.setVisibility(View.GONE);
-                    userListInst.updateUsers();
+                    userListInst.updateUsers(null);
                 }
             }
         });
@@ -116,7 +118,19 @@ public class UserProfile extends AppCompatActivity {
     }
 
     private void setRequests(){
-        Map<String, Object> currAdd = new HashMap<>();
+        ArrayList<String> currFrSent = new ArrayList<>(currUser.sentFriendRequests);
+        currFrSent.add(userID);
+        ArrayList<String> otherFReq = new ArrayList<>(user.friendRequests);
+        otherFReq.add(currId);
+        db.collection("users").document(currId).update("sentFriendRequests", currFrSent);
+        db.collection("users").document(userID).update("friendRequests", otherFReq);
+                /*.addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                    }
+                });*/
+        /*Map<String, Object> currAdd = new HashMap<>();
         currAdd.put("id", currId);
         Map<String, Object> otherAdd = new HashMap<>();
         otherAdd.put("id", userID);
@@ -143,6 +157,6 @@ public class UserProfile extends AppCompatActivity {
                             Log.w(TAG, "ADD REQUEST ERROR ", task.getException());
                         }
                     }
-                });
+                });*/
     }
 }
