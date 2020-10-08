@@ -2,6 +2,7 @@ package com.example.outdoors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 
 import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -10,11 +11,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -22,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserProfile extends AppCompatActivity {
+public class UserProfile extends BaseDrawerActivity {
 
     final static String TAG = "USERPROFILE";
 
@@ -33,12 +40,20 @@ public class UserProfile extends AppCompatActivity {
     FirebaseFirestore db;
     final String currId = DBAuth.getInstance().getAuth().getCurrentUser().getUid();
 
+    ArrayList<User> onlineUsers;
+
+    ArrayList<User> offlineUsers;
+
     final UserList userListInst = UserList.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_profile);
+        //setContentView(R.layout.activity_user_profile);
+
+        FrameLayout contentLayout = (FrameLayout) findViewById(R.id.contentFrame);
+        getLayoutInflater().inflate(R.layout.activity_user_profile, contentLayout);
+        ;
 
         try{
             Intent intent = getIntent();
@@ -54,6 +69,8 @@ public class UserProfile extends AppCompatActivity {
 
         user = userListInst.getUser(userID);
 
+        setTitle(user.getUsername());
+
         userFriends = new ArrayList<>();
 
         for(String friendID : user.friends){
@@ -65,7 +82,7 @@ public class UserProfile extends AppCompatActivity {
 
         final Button addButt = (Button) findViewById(R.id.userProfileAddFriend);
 
-        if(user.friends.contains(currId)){
+        if(user.friends.contains(currId) || user.equals(currUser)){
             addButt.setVisibility(View.GONE);
         }
 
@@ -111,10 +128,56 @@ public class UserProfile extends AppCompatActivity {
         });
 
 
+        onlineUsers = new ArrayList<>();
+
+        offlineUsers = new ArrayList<>();
+
+        for(User usr : userListInst.getUserList()){
+            if(usr.getStatus()){
+                onlineUsers.add(usr);
+            }else{
+                offlineUsers.add(usr);
+            }
+        }
+
+        Log.d(TAG, "ONLINE USERS: " + onlineUsers);
+
+        Log.d(TAG, "OFFLINE USERS: " + offlineUsers);
+
+        Toast.makeText(this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
+
+        Button fbButt = (Button) findViewById(R.id.fireBaseButton);
+        fbButt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onlineUsers = new ArrayList<>();
+
+                offlineUsers = new ArrayList<>();
+                for(User usr : userListInst.getUserList()){
+                    if(usr.getStatus()){
+                        onlineUsers.add(usr);
+                    }else{
+                        offlineUsers.add(usr);
+                    }
+                }
+                Toast.makeText(UserProfile.this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         ListView friendList = (ListView) findViewById(R.id.userProfileFriendList);
 
         friendList.setAdapter(new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, userFriends));
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        }else {
+            super.onBackPressed();
+        }
     }
 
     private void setRequests(){

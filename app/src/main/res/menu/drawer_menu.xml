@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/groupItems"
+        android:checkableBehavior="single">
+
+        <item android:id="@+id/navMap"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navMap" />
+
+        <item android:id="@+id/navProfile"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navProfile" />
+
+        <item android:id="@+id/navFriends"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navFriends" />
+
+        <item android:id="@+id/navPlaces"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navPlaces" />
+
+        <item android:id="@+id/navRoutes"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navRoutes" />
+
+        <item android:id="@+id/navSchedule"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navSched" />
+
+        <item android:id="@+id/navLeaderboard"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navLeaderboard" />
+
+        <item android:id="@+id/navInvites"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navInvites" />
+
+    </group>
+
+    <group android:id="@+id/groupLogOut">
+
+            <item android:id="@+id/navLogOut"
+                android:icon="@drawable/ic_launcher_background"
+                android:title="@string/navLogOut" />
+
+    </group>
+
+
+</menu>

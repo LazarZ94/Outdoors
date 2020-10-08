@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.DialogFragment;
 
 import android.Manifest;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -43,7 +45,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class BluetoothActivity extends AppCompatActivity {
+public class BluetoothActivity extends BaseDrawerActivity {
 
     private String TAG = "BT ACTIVITY";
 
@@ -123,7 +125,10 @@ public class BluetoothActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth);
+        //setContentView(R.layout.activity_bluetooth);
+
+        FrameLayout contentLayout = (FrameLayout) findViewById(R.id.contentFrame);
+        getLayoutInflater().inflate(R.layout.activity_bluetooth, contentLayout);
 
         btAdapter.disable();
 
@@ -189,7 +194,7 @@ public class BluetoothActivity extends AppCompatActivity {
             AcceptThread server = new AcceptThread();
             server.start();
             startActivity(discInt);
-            LocationManager locMngr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            //LocationManager locMngr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             /*if(!locMngr.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                 startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_LOCATION_SERVICE);
             }*/
@@ -208,6 +213,15 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onDestroy();
         btAdapter.disable();
         unregisterReceiver(receiver);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        }else {
+            super.onBackPressed();
+        }
     }
 
     private class AcceptThread extends Thread {

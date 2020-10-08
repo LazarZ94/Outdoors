@@ -21,6 +21,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -35,6 +36,7 @@ public class SignUp extends AppCompatActivity {
     private static String TAG = "SIGN UP ACTIVITY";
 
     private FirebaseFirestore db;
+    private FirebaseDatabase fbdb;
     private static final String COLLECTION = "users";
 
     private SectionsStatePagesAdapter mSectionsStatePagerAdapter;
@@ -75,6 +77,7 @@ public class SignUp extends AppCompatActivity {
 
         mAuth = DBAuth.getInstance().getAuth();
         db = DBAuth.getInstance().getDB();
+        fbdb = DBAuth.getInstance().getFBDB();
 
     }
 
@@ -250,6 +253,9 @@ public class SignUp extends AppCompatActivity {
     private void addNewUser(String uid){
         ArrayList<String> emptyArr = new ArrayList<>();
         User user = new User(email,username,fName,lName,phoneNumber, emptyArr, emptyArr, emptyArr);
+        fbdb.getReference("users/" + uid + "/onlineStatus").setValue(true);
+        fbdb.getReference("users/" + uid + "/lat").setValue(0.0d);
+        fbdb.getReference("users/" + uid + "/lon").setValue(0.0d);
         db.collection(COLLECTION)
                 .document(uid).set(user);
     }

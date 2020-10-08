@@ -86,10 +86,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                manageGoogleAuth(account);
             }
 
-            //String idToken = account.getIdToken();
-
-            //SIGNED IN
-
         }catch (ApiException e) {
             Log.w(TAG, "signInResult: failed code=" + e.getStatusCode());
             //ERROR SIGNING IN
@@ -116,12 +112,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
     @Override
     protected void onStart() {
         super.onStart();
-        //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        //IF ALLREADY SIGNED IN account != null
         FirebaseUser currUser = mAuth.getCurrentUser();
         Log.d(TAG, "CURRENT USER MAINACT PRVI PUT" + currUser);
         UserList.getInstance().updateUsers(this);
@@ -158,14 +151,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //TODO VALIDACIJA BROJA TELEFONA I AUTOFILL
 
     //TODO LANDSCAPE
-
-    //TODO REFACTOR USERDB I DA IDE KROZ USERLIST SVE I U LOGIN I SIGNUP
-    //TODO USERPROFILE STRANA I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
-
-    //TODO BT FRIEND ADD
-    //TODO PROVERI DA LI SU VEC PRIJATELJI
-
-    //TODO REFACTOR SVE ZA BAZU DA BUDE JEDNA KLASA AUTH I USERLIST DA KORISTE AUTH IDE PREKO UL
+    //TODO USERPROFILE STRANA I FRIENDREQ I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
 
     //TODO MAIL CONFIRM, INFO RECOVERY
 
