@@ -41,9 +41,9 @@ public class LogIn extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
-        mAuth = UserAuthentication.getInstance().getAuth();
+        mAuth = DBAuth.getInstance().getAuth();
 
-        db = UserAuthentication.getInstance().getDB();
+        db = DBAuth.getInstance().getDB();
 
         Button logInButt = (Button) findViewById(R.id.logInButton);
         logInButt.setOnClickListener(new View.OnClickListener() {
@@ -71,7 +71,7 @@ public class LogIn extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if(task.isSuccessful()){
-                            if(task.getResult()!=null) {
+                            if(!task.getResult().isEmpty()) {
                                 for (QueryDocumentSnapshot doc : task.getResult()) {
                                     Log.d(TAG, doc.getId() + " => " + doc.getData());
                                     User user = doc.toObject(User.class);
@@ -97,16 +97,17 @@ public class LogIn extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
+                            Log.d(TAG, "LOG IN SUCCESS ");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            UserAuthentication inst = UserAuthentication.getInstance();
-                            inst.setUserAndUpdate(user, LogIn.this);
+                            UserList inst = UserList.getInstance();
+                            inst.updateUsers(LogIn.this);
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LogIn.this, "Log In failed", Toast.LENGTH_SHORT).show();
                             TextView pwErr = (TextView) findViewById(R.id.passwordLogInError);
                             String errMsg = "Wrong password";
                             pwErr.setText(errMsg);
-                            UserAuthentication.getInstance().updateUI(LogIn.this,null);
+                            UserList.getInstance().updateUI(LogIn.this,null);
                         }
                     }
                 });

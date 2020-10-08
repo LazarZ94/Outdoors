@@ -14,4 +14,24 @@
     <string name="signUpFNameEdit">First Name</string>
     <string name="signUpLNameEdit">Last Name</string>
     <string name="signUpPhoneEdit">Phone Number</string>
+
+    <string name="addFriend">Add As Friend</string>
+
+    <string name="OK">OK</string>
+
+    <string name="acceptBTReq">Accept</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="navMap">Map</string>
+    <string name="navProfile">Profile</string>
+    <string name="navFriends">Friends</string>
+    <string name="navPlaces">My Places</string>
+    <string name="navRoutes">My Routes</string>
+    <string name="navSched">Schedule</string>
+    <string name="navLeaderboard">Leaderboard</string>
+    <string name="navInvites">Invites</string>
+    <string name="navLogOut">Log Out</string>
+
+    <string name="navDrawerOpen">Open navigation drawer</string>
+    <string name="navDrawerClose">Close navigation drawer</string>
 </resources>

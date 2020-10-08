@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private GoogleSignInClient mGoogleSignInClient;
 
-    UserAuthentication userInst;
+    UserList userInst;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView signUpLink = (TextView) findViewById(R.id.signUp);
         signUpLink.setOnClickListener(this);
 
-        userInst = UserAuthentication.getInstance();
+        userInst = UserList.getInstance();
 
-        mAuth = userInst.getAuth();
+        mAuth = DBAuth.getInstance().getAuth();
 
         String webClient = getString(R.string.default_web_client_id);
         userInst.setGoogleSignInClient(this, webClient);
@@ -86,10 +86,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                manageGoogleAuth(account);
             }
 
-            //String idToken = account.getIdToken();
-
-            //SIGNED IN
-
         }catch (ApiException e) {
             Log.w(TAG, "signInResult: failed code=" + e.getStatusCode());
             //ERROR SIGNING IN
@@ -107,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "GOOGLE SIGN IN SUCCESSFUL");
                     FirebaseUser userFB = mAuth.getCurrentUser();
                     Log.d(TAG, "USERFB ATTRS: " + userFB.getDisplayName() + userFB.getEmail());
-                    userInst.setUserAndUpdate(userFB, MainActivity.this);
+                    userInst.updateUsers(MainActivity.this);
                 }else{
                     Toast.makeText(MainActivity.this, "Sign in with google failed", Toast.LENGTH_SHORT).show();
                 }
@@ -116,14 +112,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
     @Override
     protected void onStart() {
         super.onStart();
-        //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        //IF ALLREADY SIGNED IN account != null
         FirebaseUser currUser = mAuth.getCurrentUser();
-        UserAuthentication.getInstance().setUserAndUpdate(currUser, this);
+        Log.d(TAG, "CURRENT USER MAINACT PRVI PUT" + currUser);
+        UserList.getInstance().updateUsers(this);
     }
 
 
@@ -151,9 +145,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //TODO LOGIN USERNAME VALIDACIJA
+    //TODO KONFLIKT ZA GOOGLE LOGIN USERNAME (WHILE TREBA)
     //TODO FJE I IZGLED
     //TODO LAYOUT ZA INPUT FIELD I ERRMSG ZA SIGNUP
     //TODO VALIDACIJA BROJA TELEFONA I AUTOFILL
+
+    //TODO LANDSCAPE
+    //TODO USERPROFILE STRANA I FRIENDREQ I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
+
+    //TODO MAIL CONFIRM, INFO RECOVERY
 
 }
