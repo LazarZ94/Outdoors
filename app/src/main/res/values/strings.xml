@@ -34,4 +34,7 @@
 
     <string name="navDrawerOpen">Open navigation drawer</string>
     <string name="navDrawerClose">Close navigation drawer</string>
+
+    <string name="descTWPOI">Description:</string>
+    <string name="submit">Submit</string>
 </resources>

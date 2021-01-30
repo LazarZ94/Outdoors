@@ -1,3 +1,10 @@
+/*
+
+Klase za upravljanje BT handshake-om
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;

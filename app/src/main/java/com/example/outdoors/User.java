@@ -1,5 +1,13 @@
+/*
+
+User klasa
+
+ */
+
+
 package com.example.outdoors;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
@@ -12,8 +20,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @IgnoreExtraProperties
 public class User {
@@ -34,9 +46,11 @@ public class User {
     public ArrayList<String> friendRequests = new ArrayList<>();
     public ArrayList<String> sentFriendRequests = new ArrayList<>();
     @Exclude public boolean onlineStatus;
-    @Exclude public Uri img;
+    @Exclude public Bitmap img;
     @Exclude public double lat;
     @Exclude public double lon;
+    @Exclude public ArrayList<StorageReference> POIs = new ArrayList<>();
+    @Exclude public Map<String, StorageMetadata> POIMetadata = new HashMap<String, StorageMetadata>();
     public User(){
 
     }
@@ -100,6 +114,13 @@ public class User {
         });
     }
 
+    public void setAvatar(Bitmap avatar){
+        this.img = avatar;
+    }
+
+    public Bitmap getAvatar(){
+        return this.img;
+    }
 
     public void setStatus(boolean status){ this.onlineStatus = status;}
 

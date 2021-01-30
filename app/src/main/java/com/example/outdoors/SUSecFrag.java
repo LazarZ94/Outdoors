@@ -1,4 +1,12 @@
+/*
+
+Fragment za sekundarne informacije pri reg
+
+ */
+
+
 package com.example.outdoors;
+
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,7 +33,7 @@ public class SUSecFrag extends Fragment {
         prevButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((SignUp)getActivity()).setViewPager(0);
+                ((SignUpActivity)getActivity()).setViewPager(0);
             }
         });
 
@@ -34,7 +42,7 @@ public class SUSecFrag extends Fragment {
         submitButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((SignUp)getActivity()).setInfo();
+                ((SignUpActivity)getActivity()).setInfo();
             }
         });
 

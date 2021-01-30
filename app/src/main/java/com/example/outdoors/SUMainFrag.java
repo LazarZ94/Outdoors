@@ -1,3 +1,10 @@
+/*
+
+Fragment za neophodne informacije pri registrovanju
+
+ */
+
+
 package com.example.outdoors;
 
 import android.os.Bundle;
@@ -25,7 +32,7 @@ public class SUMainFrag extends Fragment {
         nextButt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((SignUp)getActivity()).setViewPager(1);
+                ((SignUpActivity)getActivity()).setViewPager(1);
             }
         });
 

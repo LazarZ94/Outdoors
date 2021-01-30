@@ -1,3 +1,10 @@
+/*
+
+Glavni activity (pocetni ekran)
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
@@ -15,7 +22,6 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -64,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //inicijalizovanje google signin-a
     private void googleSignIn(){
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -83,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try{
             GoogleSignInAccount account = task.getResult(ApiException.class);
             if(account != null){
+                //ako postoji google nalog, obrada signin-a
                manageGoogleAuth(account);
             }
 
@@ -96,15 +104,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "FB AUTH WITH GOOGLE " + account.getId());
 
         AuthCredential creds = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        //logovanje
         mAuth.signInWithCredential(creds).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
+                    //ako uspesno postavljanje trenutnog FB korisnika i updateovanje liste korisnika
                     Log.d(TAG, "GOOGLE SIGN IN SUCCESSFUL");
                     FirebaseUser userFB = mAuth.getCurrentUser();
                     Log.d(TAG, "USERFB ATTRS: " + userFB.getDisplayName() + userFB.getEmail());
                     userInst.updateUsers(MainActivity.this);
                 }else{
+                    //u suprotnom neuspesan signup
                     Toast.makeText(MainActivity.this, "Sign in with google failed", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -114,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onStart() {
+        //provera da li je korisnik ulogovan pri pokretanju i updateovanje liste
         super.onStart();
         FirebaseUser currUser = mAuth.getCurrentUser();
         Log.d(TAG, "CURRENT USER MAINACT PRVI PUT" + currUser);
@@ -124,16 +136,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view){
+        //redirect iz pocetnog ekrana ka loginu, signup i googleloginu
         switch(view.getId()){
             case R.id.logIn: {
                 Log.d(TAG, "Clicked LOGINBUTTON GOING TO LOG IN SCREEN");
-                Intent i = new Intent(MainActivity.this, LogIn.class);
+                Intent i = new Intent(MainActivity.this, LogInActivity.class);
                 startActivity(i);
                 break;
             }
             case R.id.signUp: {
                 Log.d(TAG, "Clicked SIGNUPBUTTON GOING TO SIGN UP SCREEN");
-                Intent i = new Intent(MainActivity.this, SignUp.class);
+                Intent i = new Intent(MainActivity.this, SignUpActivity.class);
                 startActivity(i);
                 break;
             }
@@ -150,9 +163,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //TODO LAYOUT ZA INPUT FIELD I ERRMSG ZA SIGNUP
     //TODO VALIDACIJA BROJA TELEFONA I AUTOFILL
 
+    //TODO profile pic
+
     //TODO LANDSCAPE
     //TODO USERPROFILE STRANA I FRIENDREQ I FRAGMENTI ZA UPRAVLJANJE FRIENDLISTE
 
     //TODO MAIL CONFIRM, INFO RECOVERY
+
+    //TODO crash na logout
 
 }

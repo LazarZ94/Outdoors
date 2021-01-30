@@ -1,6 +1,12 @@
+/*
+
+Activity za prikaz liste prijatelja
+
+ */
+
+
 package com.example.outdoors;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 
 import android.content.Intent;
@@ -60,7 +66,7 @@ public class FriendListActivity extends BaseDrawerActivity {
                 Bundle userBundle = new Bundle();
                 String uid = userListInst.getUserId((User) adapterView.getAdapter().getItem(i));
                 userBundle.putString("userID", uid);
-                Intent intent = new Intent(FriendListActivity.this, UserProfile.class);
+                Intent intent = new Intent(FriendListActivity.this, UserProfileActivity.class);
                 intent.putExtras(userBundle);
                 startActivity(intent);
             }

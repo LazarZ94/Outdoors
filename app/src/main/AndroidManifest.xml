@@ -9,7 +9,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -18,16 +23,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FriendListActivity"></activity>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity android:name=".FriendListActivity" />
         <activity android:name=".BaseDrawerActivity" />
         <activity android:name=".BluetoothActivity" />
-        <activity android:name=".UserProfile" />
-        <activity android:name=".MainScreen" />
+        <activity android:name=".UserProfileActivity" />
+        <activity android:name=".MainScreenActivity" />
+        <activity android:name=".PlacesActivity"/>
+        <activity android:name=".InvitesActivity"/>
         <activity
-            android:name=".SignUp"
+            android:name=".SignUpActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".LogIn"
+            android:name=".LogInActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".MainActivity">
             <intent-filter>

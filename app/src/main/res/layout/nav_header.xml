@@ -12,10 +12,10 @@
 
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"
+        android:id="@+id/navHeaderAvatar"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@mipmap/avatar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.04"
@@ -31,7 +31,7 @@
         android:paddingTop="8dp"
         android:text=""
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/navHeaderAvatar"
         app:layout_constraintBottom_toTopOf="@id/navHeaderEmail"
         tools:layout_editor_absoluteY="97dp" />
 
@@ -42,6 +42,6 @@
         android:gravity="bottom"
         android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/imageView" />
+        app:layout_constraintStart_toStartOf="@+id/navHeaderAvatar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

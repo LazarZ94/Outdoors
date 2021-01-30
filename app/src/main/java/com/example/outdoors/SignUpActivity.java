@@ -1,37 +1,36 @@
+/*
+
+Activity za sign up
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-public class SignUp extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
 
     private static String TAG = "SIGN UP ACTIVITY";
 
@@ -70,9 +69,10 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        //page adapter za listanje fragmenata
         mSectionsStatePagerAdapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.containerSignUp);
         setUpViewPager(mViewPager);
 
         mAuth = DBAuth.getInstance().getAuth();
@@ -84,6 +84,7 @@ public class SignUp extends AppCompatActivity {
 
     private SectionsStatePagesAdapter adapter;
 
+    //podesavanje pager-a i inicijalizacija unutrasnjih fragmenata
     private void setUpViewPager(ViewPager viewPager){
         adapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         adapter.addFragment(new SUMainFrag(), "MainSUInfo");
@@ -91,10 +92,12 @@ public class SignUp extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
+    //redirect na fragment sa rednim brojem
     public void setViewPager(int fragNum){
         mViewPager.setCurrentItem(fragNum);
     }
 
+    //prikupljanje i validacija unesenih informacija iz fragmenata
     public void setInfo(){
         SUMainFrag main = (SUMainFrag) adapter.getItem(0);
         SUSecFrag pers = (SUSecFrag) adapter.getItem(1);
@@ -108,6 +111,7 @@ public class SignUp extends AppCompatActivity {
         //createUser();
     }
 
+    //provera validnosti podataka i obavestavanje korisnika ili kreiranje korisnika ukoliko je unos korektan
     private void checkInput(){
         int errs = 0;
         for(String err : errors){
@@ -123,24 +127,29 @@ public class SignUp extends AppCompatActivity {
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if(task.isSuccessful()){
                                 if(task.getResult().isEmpty()){
+                                    //ukoliko korisnicko ime nije zauzeto kreira se korisnik
                                     createUser();
                                 }else{
+                                    //u suprotnom se podesava flag za zauzeto korisnicko ime
                                     errors[USERNAME_ERROR] = "Username taken";
                                     setErrors();
                                 }
 
                             }else{
+                                //obavestenje ukoliko dodje do greske pri upitu
                                 Log.d(TAG, "Error getting data" , task.getException());
-                                Toast.makeText(SignUp.this, "Error getting data", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SignUpActivity.this, "Error getting data", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
         }else{
+            //ukoliko ima gresaka obavestava korisnika
             setErrors();
         }
     }
 
     private void setErrors(){
+        //postavlja labele sa informacijama o pogresno unetim podacima
         TextView mailErr = (TextView) findViewById(R.id.signUpMailError);
         TextView usernameErr = (TextView) findViewById(R.id.signUpUsernameError);
         TextView pwErr = (TextView) findViewById(R.id.signUpPasswordError);
@@ -227,29 +236,33 @@ public class SignUp extends AppCompatActivity {
         }
     }
 
+    //kreiranje korisnika pomocu emaila i pw
     private void createUser(){
         mAuth.createUserWithEmailAndPassword(this.email, this.password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()) {
+                            //ukoliko je uspesno kreiran postavljanje trenutnog korisnika, dodavanje u bazu i update liste
                             //Toast.makeText(SignUp.this, "User created", Toast.LENGTH_SHORT).show();
                             FirebaseUser userFB = mAuth.getCurrentUser();
-                            Toast.makeText(SignUp.this, "UserID" + userFB.getUid(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUpActivity.this, "UserID" + userFB.getUid(), Toast.LENGTH_SHORT).show();
                             Log.w(TAG+" PRE POZIVA ADDUSER", "USERID = " + userFB.getUid());
                             String uid = userFB.getUid();
                             addNewUser(uid);
                             UserList inst = UserList.getInstance();
-                            inst.updateUsers(SignUp.this);
+                            inst.updateUsers(SignUpActivity.this);
                         }else {
+                            //u suprotnom prijaviti gresku i update UI
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(SignUp.this, "Error creating user", Toast.LENGTH_SHORT).show();
-                            UserList.getInstance().updateUI(SignUp.this,null);
+                            Toast.makeText(SignUpActivity.this, "Error creating user", Toast.LENGTH_SHORT).show();
+                            UserList.getInstance().updateUI(SignUpActivity.this,null);
                         }
                     }
                 });
     }
 
+    //upis novog korisnika u bazu sa svoim FB UID kao id
     private void addNewUser(String uid){
         ArrayList<String> emptyArr = new ArrayList<>();
         User user = new User(email,username,fName,lName,phoneNumber, emptyArr, emptyArr, emptyArr);

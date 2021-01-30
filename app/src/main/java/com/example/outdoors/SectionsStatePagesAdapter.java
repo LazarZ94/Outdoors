@@ -1,3 +1,10 @@
+/*
+
+Page Adapter za fragmente
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;

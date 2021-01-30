@@ -1,35 +1,30 @@
+/*
+
+Klasa za prikaz korisnickog profila
+
+ */
+
+
 package com.example.outdoors;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 
 import android.content.Intent;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-public class UserProfile extends BaseDrawerActivity {
+public class UserProfileActivity extends BaseDrawerActivity {
 
     final static String TAG = "USERPROFILE";
 
@@ -78,6 +73,11 @@ public class UserProfile extends BaseDrawerActivity {
         }
 
         currUser = UserList.getInstance().getCurrentUser();
+
+        ImageView avatarView = (ImageView) findViewById(R.id.userProfileAvatar);
+        if(user.getAvatar()!=null){
+            avatarView.setImageBitmap(user.getAvatar());
+        }
 
 
         final Button addButt = (Button) findViewById(R.id.userProfileAddFriend);
@@ -160,7 +160,7 @@ public class UserProfile extends BaseDrawerActivity {
                         offlineUsers.add(usr);
                     }
                 }
-                Toast.makeText(UserProfile.this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
             }
         });
 

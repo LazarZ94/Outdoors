@@ -1,10 +1,19 @@
+/*
+
+Staticka singleton klasa za listu korisnika
+
+ */
+
+
 package com.example.outdoors;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +22,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,10 +36,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -42,10 +56,12 @@ public class UserList {
     private User currentUser = null;
     private FirebaseFirestore db;
     private FirebaseDatabase fbdb;
-
+    private FirebaseStorage fbs;
+    private Bitmap currAvatar = null;
     private GoogleSignInClient mGoogleSignInClient;
 
     private BiMap<String, User> userList;
+    private BiMap<String, Bitmap> userAvatars = HashBiMap.create();
 
 
     private UserList(){
@@ -53,9 +69,11 @@ public class UserList {
         currentUserFB = mAuth.getCurrentUser();
         db = DBAuth.getInstance().getDB();
         fbdb = DBAuth.getInstance().getFBDB();
+        fbs = DBAuth.getInstance().getStorage();
         userList = HashBiMap.create();
         getAllUsers(null);
     }
+
 
     public ArrayList<User> getOnlineUsers(){
         ArrayList<User> onlineUsers = new ArrayList<>();
@@ -126,14 +144,16 @@ public class UserList {
                         if(task.isSuccessful()){
                             if(!task.getResult().isEmpty()) {
                                 for (QueryDocumentSnapshot doc : task.getResult()) {
-                                    Log.d(TAG, doc.getId() + " => " + doc.getData());
+                                    String docID = doc.getId();
+                                    Log.d(TAG, docID + " => " + doc.getData());
                                     User user = doc.toObject(User.class);
                                     if (user.statusRef == null) {
-                                        user.setStatusListener(doc.getId());
+                                        user.setStatusListener(docID);
                                     }
-                                    user.setLocationListener(doc.getId());
+                                    user.setLocationListener(docID);
                                     Log.d(TAG, "EMAIL JE " + user.email);
-                                    userList.put(doc.getId(), user);
+                                    setPOIList(user, docID);
+                                    userList.put(docID, user);
                                 }
                                 Log.d(TAG, "PRE SETIUPDATE USERLIST JE " + userList);
                                 setUserAndUpdate(mAuth.getCurrentUser(), context);
@@ -150,7 +170,41 @@ public class UserList {
         return currentUser;
     }
 
+    private void setPOIList(final User user, String uid){
+        Log.d(TAG, "setPOIList: IN POIIII");
+        StorageReference listPOI = fbs.getReference().child("images/POI/"+ uid + "/");
+        listPOI.listAll()
+                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                    @Override
+                    public void onSuccess(ListResult listResult) {
+                        for(StorageReference item : listResult.getItems()){
+                            Log.d(TAG, "onSuccess: ITEM" + item);
+                            addPOIMetadata(user, item);
+                            user.POIs.add(item);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: ERROR GETTING FILE");;
+            }
+        });
+    }
 
+    private void addPOIMetadata(final User user, StorageReference ref){
+        final String fileName = ref.getName();
+        ref.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+            @Override
+            public void onSuccess(StorageMetadata storageMetadata) {
+                user.POIMetadata.put(fileName, storageMetadata);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: Problem getting metadata");
+            }
+        });
+    }
 
     private void setUserStatus(final String UID){
         final DatabaseReference statusRef = fbdb.getReference("users/"+UID+"/onlineStatus");;
@@ -178,12 +232,46 @@ public class UserList {
                 currentUser = addNewGoogleUser(user);
             }
             setUserStatus(user.getUid());
+            loadUserAvatars();
             if(context!= null) {
                 updateUI(context, user);
             }
         }else{
             currentUser = null;
         }
+    }
+
+    private void loadUserAvatars(){
+        ArrayList<User> users = new ArrayList<>(userList.values());
+        for (User usr : users){
+            if(!userAvatars.containsKey(getUserId(usr))) {
+                loadAvatar(getUserId(usr), usr);
+            }else{
+                usr.setAvatar(userAvatars.get(getUserId(usr)));
+            }
+        }
+    }
+
+    private void loadAvatar(String uID, final User user){
+        StorageReference avatarRef = fbs.getReference().child("images/avatars/"+uID);
+        final long size = 1024 * 1024 * 10;
+        avatarRef.getBytes(size).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                loadBitmapAvatar(user, bytes);
+            }
+        }).addOnFailureListener(new OnFailureListener(){
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+    }
+
+    private void loadBitmapAvatar(User user, byte[] bytes){
+        Bitmap avatar = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        userAvatars.put(getUserId(user), avatar);
+        user.setAvatar(avatar);
     }
 
 
@@ -230,13 +318,14 @@ public class UserList {
         final DocumentReference userRef = db.collection("users").document(getCurrentUserID());
         userRef.update("onlineStatus", false);
         Intent i = new Intent(context, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i);
     }
 
     public void updateUI(AppCompatActivity context, FirebaseUser user){
         if(user != null){
             Log.d(TAG, "CURRENT USER U UPDATEUI " + currentUser);
-            Intent i = new Intent(context, MainScreen.class);
+            Intent i = new Intent(context, MainScreenActivity.class);
             context.startActivity(i);
             context.finish();
         }

@@ -1,13 +1,18 @@
+/*
+
+Glavni ekran (mapa)
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -16,56 +21,48 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
 
-import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlay;
-import org.osmdroid.views.overlay.ItemizedOverlayWithFocus;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
 
-public class MainScreen extends BaseDrawerActivity implements LocationListener {
+import static java.security.AccessController.getContext;
+
+public class MainScreenActivity extends BaseDrawerActivity implements LocationListener {
 
     private static String TAG = "MAIN SCREEN";
 
@@ -79,6 +76,8 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
 
     private FirebaseDatabase fbdb = DBAuth.getInstance().getFBDB();
 
+    private FirebaseStorage fbs = DBAuth.getInstance().getStorage();
+
     boolean doubleTap = false;
 
     final String currId = mAuth.getCurrentUser().getUid();
@@ -86,6 +85,10 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
     static final int PERMISSION_FINE_LOC = 0;
 
     static final int PERMISSION_COARSE_LOC = 1;
+
+    static final int REQUEST_IMAGE_CAPTURE = 5;
+
+    String currentPhotoPath;
 
     private MapView map = null;
 
@@ -96,6 +99,10 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
     ItemizedOverlay<OverlayItem> usersOverlay = null;
 
     Context context;
+
+    Double currentLat = null, currentLon = null;
+
+    FloatingActionButton fab;
 
     private volatile boolean stopThread = false;
 
@@ -113,6 +120,24 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
         map.setMultiTouchControls(true);
 
         statusCheck();
+
+        fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if(cameraIntent.resolveActivity(getPackageManager()) != null){
+                    File photoFile = null;
+                    photoFile = createImageFile();
+
+                    if(photoFile != null){
+                        Uri photoURI = FileProvider.getUriForFile(MainScreenActivity.this, "com.example.android.fileprovider", photoFile);
+                        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
+                    }
+                }
+            }
+        });
 
 
         mapController = map.getController();
@@ -138,6 +163,7 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
             mapController.setCenter(startPoint);
         }
 
+
         ArrayList<User> onlineUsers = new ArrayList<>();
 
         ArrayList<User> offlineUsers = new ArrayList<>();
@@ -155,6 +181,8 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
         Log.d(TAG, "OFFLINE USERS: " + offlineUsers);
 
         Toast.makeText(this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
+
+        Log.d(TAG, "onActivityResult: MAINSCR CONTEXT" + getContext());
 
         /*ArrayList<User> userList = userListInst.getUserList();
 
@@ -223,8 +251,59 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
             }
         });*/
 
-
     }
+
+    public void uploadedPOI(){
+        Toast.makeText(this, "Photo uploaded!", Toast.LENGTH_SHORT).show();
+        fab.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+            fab.setVisibility(View.INVISIBLE);
+
+            //POIFragment poiFragment = POIFragment.newInstance(currentPhotoPath, currentLat.toString(), currentLon.toString(), currId);
+
+            POIFragment poiFragment = new POIFragment();
+
+            Bundle args = new Bundle();
+            args.putString("img", currentPhotoPath);
+            args.putString("lat", currentLat.toString());
+            args.putString("lon", currentLon.toString());
+            args.putString("currID", currId);
+            poiFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.containerPOI, poiFragment).commit();
+
+        }
+    }
+
+    private File createImageFile(){
+        String timestamp = new SimpleDateFormat("yyyyMM_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timestamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        Log.d(TAG, "createImageFile: storagedir" + storageDir.getAbsolutePath());
+        try {
+            File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+            currentPhotoPath = image.getAbsolutePath();
+            return image;
+        }catch (Exception e){
+            Log.d(TAG, "createImageFile: ", e);
+        }
+        return  null;
+    }
+
+    /*private void setNavHeaderImg(){
+        NavigationView navView = (NavigationView) findViewById(R.id.navView);
+        View headerView = navView.getHeaderView(0);
+        Log.d("AAAAAAAAAAAAA", "AVATAR = " + currUser.getAvatar());
+        ImageView avatarView = (ImageView) headerView.findViewById(R.id.navHeaderAvatar);
+        if(currUser.getAvatar()!=null){
+            avatarView.setImageBitmap(currUser.getAvatar());
+        }
+    }*/
 
     private void updateUserPositions(){
         stopThread = false;
@@ -268,7 +347,7 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
                 new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
                     @Override
                     public boolean onItemSingleTapUp(int index, OverlayItem item) {
-                        Intent profileIntent = new Intent(MainScreen.this, UserProfile.class);
+                        Intent profileIntent = new Intent(MainScreenActivity.this, UserProfileActivity.class);
                         profileIntent.putExtra("userID", userListInst.getUserId(users.get(index).getTitle()));
                         startActivity(profileIntent);
                         return true;
@@ -287,8 +366,10 @@ public class MainScreen extends BaseDrawerActivity implements LocationListener {
     public void onLocationChanged(@NonNull Location location) {
         DatabaseReference lonRef = fbdb.getReference("users/"+currId+"/lon");
         DatabaseReference latRef = fbdb.getReference("users/"+currId+"/lat");
-        lonRef.setValue(location.getLongitude());
-        latRef.setValue(location.getLatitude());
+        currentLat = location.getLatitude();
+        currentLon = location.getLongitude();
+        lonRef.setValue(currentLon);
+        latRef.setValue(currentLat);
     }
 
     @Override
