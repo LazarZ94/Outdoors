@@ -27,9 +27,9 @@ import com.google.android.material.navigation.NavigationView;
 
 public class BaseDrawerActivity extends AppCompatActivity {
 
-    static UserList userListInst = UserList.getInstance();
+    UserList userListInst = UserList.getInstance();
 
-    static String currId = userListInst.getCurrentUserID();
+    String currId = userListInst.getCurrentUserID();
     User currUser = userListInst.getCurrentUser();
 
     static final private int MAIN_SCREEN = 0;
@@ -37,7 +37,10 @@ public class BaseDrawerActivity extends AppCompatActivity {
     static final private int FRIEND_LIST = 2;
     static final private int MY_PLACES = 3;
 
+
+    static final private int LEADERBOARD = 6;
     static final private int INVITES = 7;
+    static final private int SETTINGS = 8;
 
     boolean avatarSet = false;
 
@@ -117,8 +120,17 @@ public class BaseDrawerActivity extends AppCompatActivity {
                         drawer.closeDrawer(GravityCompat.START);
                         break;
 
+
+                    case R.id.navLeaderboard:
+                        selectActivity(LEADERBOARD);
+                        drawer.closeDrawer(GravityCompat.START);
+                        break;
                     case R.id.navInvites:
                         selectActivity(INVITES);
+                        drawer.closeDrawer(GravityCompat.START);
+                        break;
+                    case R.id.navSettings:
+                        selectActivity(SETTINGS);
                         drawer.closeDrawer(GravityCompat.START);
                         break;
                     case R.id.navLogOut:
@@ -170,9 +182,19 @@ public class BaseDrawerActivity extends AppCompatActivity {
                 }
                 break;
 
+            case LEADERBOARD:
+                if(!(this instanceof LeaderboardActivity)){
+                    intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
+                }
+                break;
             case INVITES:
                 if(!(this instanceof InvitesActivity)){
                     intent = new Intent(getApplicationContext(), InvitesActivity.class);
+                }
+                break;
+            case SETTINGS:
+                if(!(this instanceof SettingsActivity)){
+                    intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 }
                 break;
         }

@@ -7,10 +7,14 @@ Klasa za prikaz korisnickog profila
 
 package com.example.outdoors;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -20,8 +24,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class UserProfileActivity extends BaseDrawerActivity {
@@ -35,11 +46,17 @@ public class UserProfileActivity extends BaseDrawerActivity {
     FirebaseFirestore db;
     final String currId = DBAuth.getInstance().getAuth().getCurrentUser().getUid();
 
+    public final int IMAGE_PICKER = 1;
+
     ArrayList<User> onlineUsers;
 
     ArrayList<User> offlineUsers;
 
     final UserList userListInst = UserList.getInstance();
+
+    ImageView avatarView;
+
+    FirebaseStorage storage = DBAuth.getInstance().getStorage();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +91,21 @@ public class UserProfileActivity extends BaseDrawerActivity {
 
         currUser = UserList.getInstance().getCurrentUser();
 
-        ImageView avatarView = (ImageView) findViewById(R.id.userProfileAvatar);
+        avatarView = (ImageView) findViewById(R.id.userProfileAvatar);
         if(user.getAvatar()!=null){
             avatarView.setImageBitmap(user.getAvatar());
         }
+
+        avatarView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(UserProfileActivity.this, "Choose image", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent();
+                i.setType("image/*");
+                i.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(i, "Select Image"), IMAGE_PICKER);
+            }
+        });
 
 
         final Button addButt = (Button) findViewById(R.id.userProfileAddFriend);
@@ -169,6 +197,42 @@ public class UserProfileActivity extends BaseDrawerActivity {
 
         friendList.setAdapter(new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, userFriends));
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == IMAGE_PICKER && resultCode == RESULT_OK){
+            if(data != null && data.getData() != null){
+                try {
+                    final Bitmap imgBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                    StorageReference avatarRef = storage.getReference().child("images/avatars/" + userListInst.getCurrentUserID());
+                    byte[] newAvatar = bArrFromBM(imgBitmap);
+                    UploadTask upTask = avatarRef.putBytes(newAvatar);
+                    upTask.addOnFailureListener(new OnFailureListener(){
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(UserProfileActivity.this, "Problem uploading image!", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener(){
+                        @Override
+                        public void onSuccess(Object o) {
+                            Toast.makeText(UserProfileActivity.this, "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
+                            avatarView.setImageBitmap(imgBitmap);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private byte[] bArrFromBM(Bitmap bm){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Bitmap scaled = Bitmap.createScaledBitmap(bm, 90, 90, true);
+        scaled.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 
     @Override

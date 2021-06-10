@@ -13,6 +13,8 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
@@ -42,11 +45,24 @@ public class PlacesActivity extends BaseDrawerActivity {
 
     private String currentPOIName = "";
 
-    private POI currentPOI = new POI("Nothing here", "0", "0", "");
+    private POI currentPOI = new POI("Nothing here", "0", "0", "", "", new ArrayList<String>());
 
     public File storageDir;
 
-    User currUser = UserList.getInstance().getCurrentUser();
+    private String poiID = null;
+
+    private FirebaseStorage fbs = DBAuth.getInstance().getStorage();
+
+    UserList userListInst = UserList.getInstance();
+
+    User currUser = userListInst.getCurrentUser();
+
+    String poiUserID = null;
+
+    ArrayList<POI> poiList = new ArrayList<>();
+
+    Bitmap currPOIImg = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +73,32 @@ public class PlacesActivity extends BaseDrawerActivity {
         getLayoutInflater().inflate(R.layout.activity_places, contentLayout);
 
         storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        try{
+            Intent intent = getIntent();
+            Bundle userBundle = intent.getExtras();
+            poiID = userBundle.getString("poiID");
+            poiUserID = userBundle.getString("userID");
+        }catch (Exception e){
+            //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            //finish();
+        }
+
+        if(poiID != null){
+            POI currPOI = userListInst.getPOI(poiID);
+            poiUserID = currPOI.getuID();
+            getPOIPic(poiUserID, poiID);
+        }
+
+        if(poiUserID == null){
+            poiUserID = userListInst.getCurrentUserID();
+        }
+
+        getUserPOIs(poiUserID);
+
+
+
+        //Log.d(TAG, poiID);
 
         //mSectionsStatePagerAdapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
@@ -72,6 +114,31 @@ public class PlacesActivity extends BaseDrawerActivity {
     protected void onStart() {
         super.onStart();
         getPOIs();
+    }
+
+    private void getUserPOIs(String userID){
+        for(POI poi : userListInst.getPOIs()){
+            if(poi.getuID().equals(userID)){
+                poiList.add(poi);
+            }
+        }
+    }
+
+    public void getPOIPic(String poiUser, final String poiID){
+        StorageReference picRef = fbs.getReference().child("images/POI/full/"+poiUser+"/"+poiID);
+        final long maxSize = 7 * 1024 * 1024;
+
+        picRef.getBytes(maxSize).addOnSuccessListener(new OnSuccessListener<byte[]>(){
+            @Override
+            public void onSuccess(byte[] bytes) {
+                setCurrentPOI(userListInst.getPOI(poiID), bytes);
+            }
+        }).addOnFailureListener(new OnFailureListener(){
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(PlacesActivity.this, "Problem getting file(s).", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void getPOIs(){
@@ -115,10 +182,10 @@ public class PlacesActivity extends BaseDrawerActivity {
         }
     }
 
-    public void setCurrentPOI(StorageReference poi){
-        currentPOIName = poi.getName();
-        StorageMetadata metadata = currUser.POIMetadata.get(currentPOIName);
-        currentPOI = new POI (metadata.getCustomMetadata("desc"), metadata.getCustomMetadata("lat"), metadata.getCustomMetadata("lon"), currentPOIName);
+
+    public void setCurrentPOI(POI cPOI, byte[] img){
+        currentPOI = cPOI;
+        currPOIImg = BitmapFactory.decodeByteArray(img, 0, img.length);
         if(adapter.getCount()<2){
             adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
             adapter.notifyDataSetChanged();
@@ -126,14 +193,32 @@ public class PlacesActivity extends BaseDrawerActivity {
         setViewPager(1);
     }
 
-    public void showCurrentPOI(){
+//    public void setCurrentPOI(StorageReference poi){
+//        currentPOIName = poi.getName();
+//        StorageMetadata metadata = currUser.POIMetadata.get(currentPOIName);
+//        currentPOI = new POI (metadata.getCustomMetadata("desc"), metadata.getCustomMetadata("lat"), metadata.getCustomMetadata("lon"), currentPOIName, "");
+//        if(adapter.getCount()<2){
+//            adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
+//            adapter.notifyDataSetChanged();
+//        }
+//        setViewPager(1);
+//    }
+
+    public void showCurrentPOIOnMap(){
         Intent intent = new Intent(this, MainScreenActivity.class);
+        intent.putExtra("lat", currentPOI.getLat());
+        intent.putExtra("lon", currentPOI.getLon());
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
     }
 
     public POI getCurrentPOI(){
         return currentPOI;
+    }
+    public Bitmap getCurrPOIImg() {return currPOIImg;}
+
+    public ArrayList<POI> getPOIList(){
+        return poiList;
     }
 
     public SectionsStatePagesAdapter getAdapter(){
@@ -142,8 +227,12 @@ public class PlacesActivity extends BaseDrawerActivity {
 
     private void setUpViewPager(ViewPager viewPager){
         adapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+//        if(poiID != null){
+//            adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
+//        }else{
+//            adapter.addFragment(new PlacesListFrag(), "ListFragment");
+//        }
         adapter.addFragment(new PlacesListFrag(), "ListFragment");
-        //adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
         viewPager.setAdapter(adapter);
     }
 

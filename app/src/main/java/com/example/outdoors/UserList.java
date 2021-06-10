@@ -7,13 +7,12 @@ Staticka singleton klasa za listu korisnika
 
 package com.example.outdoors;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +24,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.navigation.NavigationView;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.firebase.auth.FirebaseAuth;
@@ -59,7 +57,7 @@ public class UserList {
     private FirebaseStorage fbs;
     private Bitmap currAvatar = null;
     private GoogleSignInClient mGoogleSignInClient;
-
+    private BiMap<String, POI> poiList;
     private BiMap<String, User> userList;
     private BiMap<String, Bitmap> userAvatars = HashBiMap.create();
 
@@ -71,6 +69,7 @@ public class UserList {
         fbdb = DBAuth.getInstance().getFBDB();
         fbs = DBAuth.getInstance().getStorage();
         userList = HashBiMap.create();
+        poiList = HashBiMap.create();
         getAllUsers(null);
     }
 
@@ -83,6 +82,15 @@ public class UserList {
                     onlineUsers.add(user);
         }
         return onlineUsers;
+    }
+
+    public ArrayList<POI> getPOIs(){
+        ArrayList<POI> pois = new ArrayList<>(poiList.values());
+        return pois;
+    }
+
+    public POI getPOI(String poiName){
+        return poiList.get(poiName);
     }
     
 
@@ -156,7 +164,8 @@ public class UserList {
                                     userList.put(docID, user);
                                 }
                                 Log.d(TAG, "PRE SETIUPDATE USERLIST JE " + userList);
-                                setUserAndUpdate(mAuth.getCurrentUser(), context);
+                                getPOIs(mAuth.getCurrentUser(), context);
+                                //setUserAndUpdate(mAuth.getCurrentUser(), context);
                                 Log.d(TAG, "BROJ KORISNIKA JE " + userList.size());
                             }
                         }else{
@@ -166,13 +175,49 @@ public class UserList {
                 });
     }
 
+    private void getPOIs(final FirebaseUser FBuser, final AppCompatActivity context){
+        db.collection("POI")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>(){
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(!task.getResult().isEmpty()){
+                            for(QueryDocumentSnapshot doc : task.getResult()){
+                                String docID = doc.getId();
+                                POI poi = doc.toObject(POI.class);
+                                StorageReference thumbRef = fbs.getReference().child("images/POI/scaled/"+poi.getuID()+"/"+poi.getName());
+                                setThumb(poi, thumbRef);
+                                poiList.put(docID, poi);
+                            }
+                        }
+                        setUserAndUpdate(FBuser, context);
+                    }
+                });
+    }
+
+    private void setThumb(final POI poi, StorageReference path){
+        final long mb = 1024 * 1024;
+        path.getBytes(mb).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Log.d(TAG, "AAAAAAAAAAAAAAAAA SET THUMB");
+                poi.setThumb(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+            }
+        });
+    }
+
     public User getCurrentUser(){
         return currentUser;
     }
 
     private void setPOIList(final User user, String uid){
         Log.d(TAG, "setPOIList: IN POIIII");
-        StorageReference listPOI = fbs.getReference().child("images/POI/"+ uid + "/");
+        //TODO: uzimaj poi listu iz firestore umesto storage
+        StorageReference listPOI = fbs.getReference().child("images/POI/full/"+ uid + "/");
         listPOI.listAll()
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                     @Override
@@ -274,6 +319,16 @@ public class UserList {
         user.setAvatar(avatar);
     }
 
+    public boolean isMyServiceRunning(AppCompatActivity context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private User addNewGoogleUser(FirebaseUser userFB){
         Random rand = new Random();
@@ -286,7 +341,7 @@ public class UserList {
         if(names.length>1)
             lName = names[1];
         ArrayList<String> emptyArr = new ArrayList<>();
-        User user = new User(mail,username,fName,lName, "", emptyArr, emptyArr, emptyArr);
+        User user = new User(mail,username,fName,lName, "", emptyArr, emptyArr, emptyArr, null);
         fbdb.getReference("users/" + uid + "/onlineStatus").setValue(true);
         fbdb.getReference("users/" + uid + "/lat").setValue(0.0d);
         fbdb.getReference("users/" + uid + "/lon").setValue(0.0d);

@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <uses-feature
         android:name="android.hardware.camera2"
@@ -35,13 +36,25 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name=".ServiceRestartReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="restartservice" />
+                <action android:name="stopservice" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".FriendListActivity" />
         <activity android:name=".BaseDrawerActivity" />
         <activity android:name=".BluetoothActivity" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".MainScreenActivity" />
         <activity android:name=".PlacesActivity"/>
+        <activity android:name=".LeaderboardActivity"/>
         <activity android:name=".InvitesActivity"/>
+        <activity android:name=".SettingsActivity"/>
         <activity
             android:name=".SignUpActivity"
             android:windowSoftInputMode="adjustPan" />
@@ -55,6 +68,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".BackgroundService"
+            android:stopWithTask="false"/>
     </application>
 
 </manifest>

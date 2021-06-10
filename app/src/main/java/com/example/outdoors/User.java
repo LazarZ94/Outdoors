@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @IgnoreExtraProperties
-public class User {
+public class User implements Comparable {
 
     FirebaseDatabase fbdb = DBAuth.getInstance().getFBDB();
 
@@ -36,6 +36,8 @@ public class User {
 
 
     UserList userListInst = UserList.getInstance();
+
+    String TAG = "USER CLASS";
 
     public String email;
     public String username;
@@ -45,6 +47,7 @@ public class User {
     public ArrayList<String> friends = new ArrayList<>();
     public ArrayList<String> friendRequests = new ArrayList<>();
     public ArrayList<String> sentFriendRequests = new ArrayList<>();
+    public UserPreferences prefs;
     @Exclude public boolean onlineStatus;
     @Exclude public Bitmap img;
     @Exclude public double lat;
@@ -56,7 +59,7 @@ public class User {
     }
 
     public User(String email, String username, String fName, String lName,
-                String phone, ArrayList<String> friends, ArrayList<String> fReq,  ArrayList<String> sentFR){
+                String phone, ArrayList<String> friends, ArrayList<String> fReq,  ArrayList<String> sentFR, UserPreferences prefs){
         this.email = email;
         this.username = username;
         this.fName = fName;
@@ -65,6 +68,7 @@ public class User {
         this.friends = new ArrayList<>(friends);
         this.friendRequests = new ArrayList<>(fReq);
         this.sentFriendRequests = new ArrayList<>(sentFR);
+        this.prefs = prefs;
         this.onlineStatus = false;
         this.img = null;
     }
@@ -175,5 +179,32 @@ public class User {
 
     public void setPhoneNumber(String phone){
         this.phoneNumber = phone;
+    }
+
+    public void setPreferences(UserPreferences prefs){
+        this.prefs = prefs;
+    }
+
+    public UserPreferences getPreferences(){
+        return this.prefs;
+    }
+
+    public int getPoints(){
+        ArrayList<POI> pois = userListInst.getPOIs();
+        int points = 0;
+        String id = userListInst.getUserId(this);
+        for(POI poi : pois){
+            if(poi.getuID().equals(id)){
+                points += poi.getLikes().size();
+            }
+        }
+        return points;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        int rank = ((User) o).getPoints();
+
+        return rank-this.getPoints();
     }
 }

@@ -22,11 +22,11 @@
             android:id="@+id/userProfileFriendList"
             android:layout_width="350dp"
             android:layout_height="400dp"
-            android:layout_marginTop="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userProfileAddFriend" />
+            app:layout_constraintTop_toBottomOf="@+id/textView3"
+            app:layout_constraintVertical_bias="0.17000002" />
 
         <Button
             android:id="@+id/fireBaseButton"
@@ -51,6 +51,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/avatar" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Friends:"
+            app:layout_constraintStart_toStartOf="@+id/userProfileAvatar"
+            app:layout_constraintTop_toBottomOf="@+id/userProfileAddFriend" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

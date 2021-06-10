@@ -30,6 +30,7 @@
     <string name="navSched">Schedule</string>
     <string name="navLeaderboard">Leaderboard</string>
     <string name="navInvites">Invites</string>
+    <string name="navSettings">Settings</string>
     <string name="navLogOut">Log Out</string>
 
     <string name="navDrawerOpen">Open navigation drawer</string>

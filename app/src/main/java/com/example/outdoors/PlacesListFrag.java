@@ -17,12 +17,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.storage.StorageReference;
+
+import java.util.ArrayList;
 
 public class PlacesListFrag extends Fragment {
 
@@ -37,11 +40,13 @@ public class PlacesListFrag extends Fragment {
 
         LinearLayout scrollLayout = (LinearLayout) view.findViewById(R.id.placesListLayout);
 
+        ArrayList<POI> poiList = ((PlacesActivity)getActivity()).getPOIList();
 
-
-        for(final StorageReference poi : currUser.POIs){
+        for(final POI poi : poiList){
+            Log.d("AAAAAAAAAAAAAAAAAAAAAA", String.valueOf(poi));
             TextView tw = new TextView(getContext());
-            String desc = currUser.POIMetadata.get(poi.getName()).getCustomMetadata("desc") + "AAAAAAA";
+//            String desc = currUser.POIMetadata.get(poi.getName()).getCustomMetadata("desc") + "AAAAAAA";
+            String desc = poi.getDesc();
             tw.setText(desc);
             tw.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 25);
             tw.setOnClickListener(new View.OnClickListener() {
@@ -53,10 +58,13 @@ public class PlacesListFrag extends Fragment {
             scrollLayout.addView(tw);
         }
 
+        Log.d("AAAA", "StorageDIR : " + ((PlacesActivity)getActivity()).storageDir);
+
         return view;
     }
 
-    private void showPOI(StorageReference poi){
-        ((PlacesActivity)getActivity()).setCurrentPOI(poi);
+    private void showPOI(POI poi){
+        Toast.makeText(getContext(), "Downloading image", Toast.LENGTH_SHORT).show();
+        ((PlacesActivity)getActivity()).getPOIPic(poi.getuID(), poi.getName());
     }
 }

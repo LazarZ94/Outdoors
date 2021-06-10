@@ -39,6 +39,10 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/navInvites" />
 
+        <item android:id="@+id/navSettings"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="@string/navSettings" />
+
     </group>
 
     <group android:id="@+id/groupLogOut">

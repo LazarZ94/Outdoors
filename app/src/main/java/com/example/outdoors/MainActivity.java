@@ -170,6 +170,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //TODO MAIL CONFIRM, INFO RECOVERY
 
-    //TODO crash na logout
+    //TODO crash na bt add
 
 }

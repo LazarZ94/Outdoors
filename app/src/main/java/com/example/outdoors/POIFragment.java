@@ -26,23 +26,30 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 
 public class POIFragment extends Fragment {
     private final String TAG = "POIFragment";
 
     FirebaseStorage fbs = DBAuth.getInstance().getStorage();
+    FirebaseFirestore fbfs = DBAuth.getInstance().getDB();
 
     private String img;
     private String lat;
     private String lon;
     private String currId;
     private String desc;
+    String fileName;
+
+    Bitmap scaledBitmap;
 
     private int width, height;
 
@@ -82,13 +89,16 @@ public class POIFragment extends Fragment {
             public void onClick(View view) {
                 desc = descEdit.getText().toString();
                 Uri file = Uri.fromFile(new File(img));
-                final StorageReference imagePOIRef = fbs.getReference().child("images/POI/"+currId+"/"+file.getLastPathSegment());
+                fileName = file.getLastPathSegment();
+                final StorageReference imagePOIRef = fbs.getReference().child("images/POI/full/"+currId+"/"+fileName);
 
                 final StorageMetadata metadata = new StorageMetadata.Builder()
                         .setCustomMetadata("lat", lat)
                         .setCustomMetadata("lon", lon)
                         .setCustomMetadata("desc", desc)
                         .build();
+
+                final POI poi = new POI(desc, lat, lon, fileName, currId, new ArrayList<String>());
 
                 Toast.makeText(getContext(), "Photo uploading", Toast.LENGTH_SHORT).show();
                 UploadTask uploadTask = imagePOIRef.putFile(file, metadata);
@@ -106,14 +116,55 @@ public class POIFragment extends Fragment {
                         User currUser = UserList.getInstance().getCurrentUser();
                         currUser.POIs.add(imagePOIRef);
                         currUser.POIMetadata.put(imagePOIRef.getName(),metadata);
-                        ((MainScreenActivity)getActivity()).uploadedPOI();
-                        closeFragment();
+                        uploadPOIInfo(poi);
+                        //((MainScreenActivity)getActivity()).uploadedPOI();
+                        //closeFragment();
                     }
                 });
             }
         });
 
         return view;
+    }
+
+    private void uploadPOIInfo(POI poi){
+        fbfs.collection("POI").document(poi.getName()).set(poi)
+                .addOnSuccessListener(new OnSuccessListener<Void>(){
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        uploadPOIThumb();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener(){
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "onFailure: failed to upload poi info", e);
+                        closeFragment();
+                    }
+                });
+    }
+
+    private void uploadPOIThumb(){
+        StorageReference stRef = fbs.getReference().child("images/POI/scaled/"+currId+"/"+fileName);
+        Bitmap bitmap = scaledBitmap;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+        Toast.makeText(getActivity(), "Uploading", Toast.LENGTH_SHORT).show();
+        UploadTask uploadTask = stRef.putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.d(TAG, "onFailure: failed to upload poi thumb", exception);
+                closeFragment();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                ((MainScreenActivity)getActivity()).uploadedPOI();
+                closeFragment();
+            }
+        });
     }
 
 
@@ -146,6 +197,7 @@ public class POIFragment extends Fragment {
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(img, bmOptions);
+        scaledBitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, false);
         imgView.setImageBitmap(bitmap);
     }
 
