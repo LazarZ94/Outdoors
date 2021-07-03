@@ -67,10 +67,12 @@ public class PlacesActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_places);
 
         FrameLayout contentLayout = (FrameLayout) findViewById(R.id.contentFrame);
         getLayoutInflater().inflate(R.layout.activity_places, contentLayout);
+
+        mViewPager = (ViewPager) findViewById(R.id.containerPlaces);
+        setUpViewPager(mViewPager);
 
         storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
@@ -78,7 +80,6 @@ public class PlacesActivity extends BaseDrawerActivity {
             Intent intent = getIntent();
             Bundle userBundle = intent.getExtras();
             poiID = userBundle.getString("poiID");
-            poiUserID = userBundle.getString("userID");
         }catch (Exception e){
             //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             //finish();
@@ -87,7 +88,7 @@ public class PlacesActivity extends BaseDrawerActivity {
         if(poiID != null){
             POI currPOI = userListInst.getPOI(poiID);
             poiUserID = currPOI.getuID();
-            getPOIPic(poiUserID, poiID);
+            setCurrentPOI(currPOI);
         }
 
         if(poiUserID == null){
@@ -97,17 +98,6 @@ public class PlacesActivity extends BaseDrawerActivity {
         getUserPOIs(poiUserID);
 
 
-
-        //Log.d(TAG, poiID);
-
-        //mSectionsStatePagerAdapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-
-        //Toast.makeText(this, "POIS length" + currUser.POIs.size(), Toast.LENGTH_SHORT).show();
-
-        //Log.d(TAG, "onCreate: POIS" + currUser.POIs);
-
-        mViewPager = (ViewPager) findViewById(R.id.containerPlaces);
-        setUpViewPager(mViewPager);
     }
 
     @Override
@@ -124,22 +114,22 @@ public class PlacesActivity extends BaseDrawerActivity {
         }
     }
 
-    public void getPOIPic(String poiUser, final String poiID){
-        StorageReference picRef = fbs.getReference().child("images/POI/full/"+poiUser+"/"+poiID);
-        final long maxSize = 7 * 1024 * 1024;
-
-        picRef.getBytes(maxSize).addOnSuccessListener(new OnSuccessListener<byte[]>(){
-            @Override
-            public void onSuccess(byte[] bytes) {
-                setCurrentPOI(userListInst.getPOI(poiID), bytes);
-            }
-        }).addOnFailureListener(new OnFailureListener(){
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(PlacesActivity.this, "Problem getting file(s).", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+//    public void getPOIPic(String poiUser, final String poiID){
+//        StorageReference picRef = fbs.getReference().child("images/POI/full/"+poiUser+"/"+poiID);
+//        final long maxSize = 7 * 1024 * 1024;
+//
+//        picRef.getBytes(maxSize).addOnSuccessListener(new OnSuccessListener<byte[]>(){
+//            @Override
+//            public void onSuccess(byte[] bytes) {
+//                setCurrentPOI(userListInst.getPOI(poiID), bytes);
+//            }
+//        }).addOnFailureListener(new OnFailureListener(){
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Toast.makeText(PlacesActivity.this, "Problem getting file(s).", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//    }
 
     private void getPOIs(){
         ArrayList<StorageReference> missingPOIs = new ArrayList<>();
@@ -183,9 +173,12 @@ public class PlacesActivity extends BaseDrawerActivity {
     }
 
 
-    public void setCurrentPOI(POI cPOI, byte[] img){
+    public void setCurrentPOI(POI cPOI){     //, byte[] img){
         currentPOI = cPOI;
-        currPOIImg = BitmapFactory.decodeByteArray(img, 0, img.length);
+        if(poiID == null){
+            poiID = cPOI.getName();
+        }
+//        currPOIImg = BitmapFactory.decodeByteArray(img, 0, img.length);
         if(adapter.getCount()<2){
             adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
             adapter.notifyDataSetChanged();
@@ -215,6 +208,15 @@ public class PlacesActivity extends BaseDrawerActivity {
     public POI getCurrentPOI(){
         return currentPOI;
     }
+
+    public String getCurrPOIID(){
+        return poiID;
+    }
+
+    public String getPOIUserID(){
+        return poiUserID;
+    }
+
     public Bitmap getCurrPOIImg() {return currPOIImg;}
 
     public ArrayList<POI> getPOIList(){
@@ -227,11 +229,7 @@ public class PlacesActivity extends BaseDrawerActivity {
 
     private void setUpViewPager(ViewPager viewPager){
         adapter = new SectionsStatePagesAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-//        if(poiID != null){
-//            adapter.addFragment(new PlaceInfoFrag(), "InfoFragment");
-//        }else{
-//            adapter.addFragment(new PlacesListFrag(), "ListFragment");
-//        }
+
         adapter.addFragment(new PlacesListFrag(), "ListFragment");
         viewPager.setAdapter(adapter);
     }

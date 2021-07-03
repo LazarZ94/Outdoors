@@ -18,6 +18,7 @@ import android.os.Process;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 //import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -25,6 +26,11 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.rpc.context.AttributeContext;
 
 import java.util.ArrayList;
@@ -33,7 +39,11 @@ public class BackgroundService extends Service {
 
     UserList userListInst = UserList.getInstance();
 
+    String currID = userListInst.getCurrentUserID();
+
     String TAG = "OUTDOORS BACKGROUND SERVICE";
+
+    FirebaseFirestore db = DBAuth.getInstance().getDB();
 
     Thread bgT;
 
@@ -53,54 +63,44 @@ public class BackgroundService extends Service {
         bgT = new Thread(new Runnable(){
             @Override
             public void run() {
-                Log.w(TAG , "IN PRINTACTIVE RUN");
+                int invCounter = 0;
                 while (true){
                     if(!bgActive){
-                        Log.w(TAG , "STOPPING THREAD ");
                         return;
                     }
                     try{
                         if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                            Log.w(TAG , "PRINT FROM SERVICE FOREGROUND");
-                            Log.w(TAG, userListInst.getUserList().toString());
                             stopForeground(true);
                             isInBg = false;
                         }else{
-                            Log.w(TAG , "PRINT FROM SERVICE BACKGROUND");
-                            Log.w(TAG, userListInst.getUserList().toString());
                             ArrayList<User> onlineUsers = userListInst.getOnlineUsers();
-                            Log.w(TAG + " CURRENT USERID", DBAuth.getInstance().getAuth().getCurrentUser().getUid());
                             if(!isInBg){
-                                Log.w(TAG, "FIRST LOOP");
                                 setForeground();
                                 isInBg = true;
-                                //if(userListInst.getCurrentUser() != null){
-                                    for(String userID : userListInst.getCurrentUser().getFriends()){
-                                        User user = userListInst.getUser(userID);
-                                        if(onlineUsers.contains(user)){
-                                            onlineFriends.add(user);
-                                        }
-                                    }
-                                //}
-                            }else{
                                 for(String userID : userListInst.getCurrentUser().getFriends()){
-                                    Log.w(TAG, "User id " + userID);
                                     User user = userListInst.getUser(userID);
                                     if(onlineUsers.contains(user)){
-                                        Log.w(TAG, "User id CONTAINED ONLINE" + userID);
-                                        Log.w(TAG + "ONLINE FRIENDS", onlineFriends.toString());
+                                        onlineFriends.add(user);
+                                    }
+                                }
+                            }else{
+                                for(String userID : userListInst.getCurrentUser().getFriends()){
+                                    User user = userListInst.getUser(userID);
+                                    if(onlineUsers.contains(user)){
                                         if(!onlineFriends.contains(user)){
-                                            Log.w(TAG, "NEW FRIEND ONLINE");
                                             sendFriendOnlineNotif(user);
                                             onlineFriends.add(user);
                                             break;
-                                            //TODO update online friends
                                         }
                                     }
                                 }
-                            }
 
+                            }
+                            if(invCounter > 3){
+                                checkInvites();
+                            }
                         }
+                        invCounter++;
                         Thread.sleep(6000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -110,9 +110,61 @@ public class BackgroundService extends Service {
         });
     }
 
-    private void sendFriendOnlineNotif(User user){
-        //TODO Intent top show user on map
+    public void checkInvites(){
+        DocumentReference userRef = db.collection("users").document(currID);
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>(){
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    DocumentSnapshot doc = task.getResult();
+                    User user = doc.toObject(User.class);
+                    for(Invite inv : user.getPlanInvites()){
+                        if(!inv.isSeen()){
+                            getInvitePlan(inv);
+                            inv.setSeen();
+                            break;
+                        }
+                    }
+                    db.collection("users").document(currID).update("planInvites", user.getPlanInvites());
+                }
+            }
+        });
+    }
 
+    private void getInvitePlan(Invite inv){
+        DocumentReference planRef = db.collection("plans").document(inv.inviteID);
+        planRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>(){
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    DocumentSnapshot doc = task.getResult();
+                    Plan plan = doc.toObject(Plan.class);
+
+                    sendPlanInviteNotification(plan);
+
+                }
+            }
+        });
+    }
+
+    private void sendPlanInviteNotification(Plan plan){
+        String CHANNEL_ID = "plan.invite.channel";
+        String CHANNEL_NAME = "New plan invite channel";
+
+        createNotificationChannel(CHANNEL_ID, CHANNEL_NAME);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_person_pin_circle_24)
+                .setContentTitle("Invited to " + plan.planTitle + " by " + userListInst.getUser(plan.createdBy).getUsername())
+                .setContentText("Scheduled for " + plan.date)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE);
+
+        NotificationManagerCompat nm = NotificationManagerCompat.from(this);
+        nm.notify(54321, builder.build());
+    }
+
+    private void sendFriendOnlineNotif(User user){
         String CHANNEL_ID = "friend.online.channel";
         String CHANNEL_NAME = "New online friend channel";
 
@@ -131,29 +183,19 @@ public class BackgroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        return super.onStartCommand(intent, flags, startId);
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 
         if(intent.getAction() != null && intent.getAction().equals("stopservice")){
-            Log.w(TAG, "STOPPING SERVICE");
             stopForeground(true);
             stopSelf();
         }
 
         printActive();
 
-        //setForeground();
-
-
-        Log.w(TAG , "AFTER PRINT ACTIVE");
-        Toast.makeText(this, "after print active", Toast.LENGTH_SHORT).show();
-
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
         bgActive = false;
         super.onDestroy();
     }
@@ -176,7 +218,6 @@ public class BackgroundService extends Service {
     }
 
     private void printActive(){
-        Log.w(TAG , "IN PRINTACTIVE");
         bgActive = true;
         if(!bgT.isAlive()){
             bgT.start();
@@ -189,13 +230,6 @@ public class BackgroundService extends Service {
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent,   PendingIntent.FLAG_UPDATE_CURRENT);
 
         if(Build.VERSION.SDK_INT >= 26){
-//            String NOTIFICATION_CHANNEL_ID = "channel.id";
-//            String channelName = "Foreground service channel";
-//            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-//
-//            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//            nm.createNotificationChannel(chan);
 
             String NOTIFICATION_CHANNEL_ID = "foreground.notification.channel";
             String CHANNEL_NAME = "Foreground service channel";

@@ -83,6 +83,8 @@ public class UserProfileActivity extends BaseDrawerActivity {
 
         setTitle(user.getUsername());
 
+//        titleTW.setText(user.getUsername());
+
         userFriends = new ArrayList<>();
 
         for(String friendID : user.friends){
@@ -150,6 +152,7 @@ public class UserProfileActivity extends BaseDrawerActivity {
                             });*/
                     setRequests();
                     addButt.setVisibility(View.GONE);
+                    Toast.makeText(UserProfileActivity.this, "Friend request sent.", Toast.LENGTH_SHORT).show();
                     userListInst.updateUsers(null);
                 }
             }

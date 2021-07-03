@@ -10,6 +10,8 @@ package com.example.outdoors;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
@@ -22,6 +24,8 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,6 +44,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -53,9 +58,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.api.LogDescriptor;
@@ -63,6 +71,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 
@@ -143,9 +152,6 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main_screen);
-
-        Log.w(TAG, "IN ONCREATE");
 
         FrameLayout contentLayout = (FrameLayout) findViewById(R.id.contentFrame);
         getLayoutInflater().inflate(R.layout.activity_main_screen, contentLayout);
@@ -193,6 +199,7 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
         });
         toolbarLayout.addView(filterButt);
 
+        setTitle("Outdoors");
 
         statusCheck();
 
@@ -252,87 +259,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
             }
         }
 
-        Log.d(TAG, "ONLINE USERS: " + onlineUsers);
-
-        Log.d(TAG, "OFFLINE USERS: " + offlineUsers);
-
-        Toast.makeText(this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
-
-        Log.d(TAG, "onActivityResult: MAINSCR CONTEXT" + getContext());
-
-        /*ArrayList<User> userList = userListInst.getUserList();
-
-        ListView requests = (ListView) findViewById(R.id.mainScreenReuests);
-
-        Log.d(TAG, "CURRENT USER JE " + currUser.toString());
-
-        Log.d(TAG, "CURRUSER FRIENDREQUESTS : " + currUser.getFriendRequests());
-
-        ArrayList<String> reqList = new ArrayList<>();
-        for(String id : currUser.getFriendRequests()){
-            reqList.add(userListInst.getUser(id).getUsername());
-        }
-
-        requests.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, reqList));
-
-
-        requests.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                /*String uid = UserList.getInstance().getUserId((User) adapterView.getAdapter().getItem(i));
-                Map<String, Object> currAddFr = new HashMap<>();
-                currAddFr.put("id", uid);
-                Map<String, Object> otherAddFr = new HashMap<>();
-                otherAddFr.put("id", currId);
-                db.collection("users")
-                        .document(currId).collection("friends").add(currAddFr);
-                db.collection("users")
-                        .document(uid).collection("friends").add(otherAddFr);*/
-                /*String userID = userListInst.getUserId((String) adapterView.getAdapter().getItem(i));
-                User other = userListInst.getUser(userID);
-                ArrayList<String> currFReq = new ArrayList<>(currUser.friendRequests);
-                currFReq.remove(userID);
-                db.collection("users").document(currId).update("friendRequests", currFReq);
-                ArrayList<String> otherSentFR = new ArrayList<>(other.sentFriendRequests);
-                otherSentFR.remove(currId);
-                db.collection("users").document(userID).update("sentFriendRequests", otherSentFR);
-                ArrayList<String> currFriends = new ArrayList<>(currUser.friends);
-                currFriends.add(userID);
-                db.collection("users").document(currId).update("friends", currFriends);
-                ArrayList<String> otherFriends = new ArrayList<>(other.friends);
-                otherFriends.add(currId);
-                db.collection("users").document(userID).update("friends", otherFriends);
-                userListInst.updateUsers(MainScreen.this);
-            }
-
-        });
-
-
-        ListView users = (ListView) findViewById(R.id.mainScreenUserList);
-
-        userList.remove(currUser);
-
-        users.setAdapter(new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, userList));
-
-
-        users.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Bundle userBundle = new Bundle();
-                String uid = userListInst.getUserId((User) adapterView.getAdapter().getItem(i));
-                userBundle.putString("userID", uid);
-                Intent intent = new Intent(MainScreen.this, UserProfile.class);
-                intent.putExtras(userBundle);
-                startActivity(intent);
-            }
-        });*/
 
     }
 
     public void setRanges(int uR, int pR){
         userRange = uR;
         poiRange = pR;
-//        UserPreferences newPrefs = new UserPreferences(uR, pR);
         currUser.getPreferences().setUserRange(uR);
         currUser.getPreferences().setPOIRange(pR);
         DocumentReference usrRef = db.collection("users").document(currId);
@@ -352,8 +284,6 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
         super.onActivityResult(requestCode,resultCode,data);
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             fab.setVisibility(View.INVISIBLE);
-
-            //POIFragment poiFragment = POIFragment.newInstance(currentPhotoPath, currentLat.toString(), currentLon.toString(), currId);
 
             POIFragment poiFragment = new POIFragment();
 
@@ -384,15 +314,7 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
         return  null;
     }
 
-    /*private void setNavHeaderImg(){
-        NavigationView navView = (NavigationView) findViewById(R.id.navView);
-        View headerView = navView.getHeaderView(0);
-        Log.d("AAAAAAAAAAAAA", "AVATAR = " + currUser.getAvatar());
-        ImageView avatarView = (ImageView) headerView.findViewById(R.id.navHeaderAvatar);
-        if(currUser.getAvatar()!=null){
-            avatarView.setImageBitmap(currUser.getAvatar());
-        }
-    }*/
+
 
     private void updateMapItems(){
         stopThread = false;
@@ -401,6 +323,7 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
             @Override
             public void run() {
                 int poiCounter = 0;
+                int inviteCounter = 0;
                 while(true){
                     if(stopThread) {
                         Log.d(TAG, "run: stopping thread");
@@ -416,7 +339,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
                             poiCounter = 0;
                             showPOIs();
                         }
+                        if(inviteCounter>5){
+                            inviteCounter = 0;
+//                            checkInvites();
+                        }
                         poiCounter++;
+                        inviteCounter++;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -424,6 +352,18 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
             }
         }).start();
     }
+
+
+
+//    private void createNotificationChannel(String channelId, String channelName){
+//        if(Build.VERSION.SDK_INT >= 26) {
+//            NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+//
+//            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//            nm.createNotificationChannel(chan);
+//        }
+//    }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private void showUsers(){
@@ -442,17 +382,13 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
                     Bitmap defIcon = BitmapFactory.decodeResource(getResources(), R.drawable.def_avatar);
                     userIcon = Bitmap.createScaledBitmap(defIcon, 84,84,true);
                 }
-                //RoundedBitmapDrawable userImg = RoundedBitmapDrawableFactory.create(getResources(), userIcon);
-                //userImg.setCornerRadius(Math.max(userIcon.getWidth(), userIcon.getHeight()) / 2.0f);
                 Bitmap userImg = getRoundedBitmap(userIcon, 42);
                 Bitmap icon = mergeToPin(BitmapFactory.decodeResource(getResources(), R.drawable.mapmarker64), userImg, true);
                 item.setMarker(new BitmapDrawable(getResources(), icon));
-                //item.setMarker(ContextCompat.getDrawable(getApplicationContext(), R.drawable.baseline_person_outline_black_18dp));
                 users.add(item);
             }
         }
 
-        Log.d(TAG, "USEWRS" + users);
         usersOverlay = new ItemizedIconOverlay<OverlayItem>(users,
                 new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
                     @Override
@@ -582,14 +518,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
 
     @Override
     protected void onResume() {
-        Toast.makeText(this, "MAINSCREEN ONRESUME", Toast.LENGTH_SHORT).show();
         super.onResume();
         map.onResume();
-        //showUsers();
         updateMapItems();
 
 
-        if(currUser.getPreferences().getBackgroundService() != false){
+        if(currUser.getPreferences()!= null && currUser.getPreferences().getBackgroundService()){
             if(!userListInst.isMyServiceRunning(this, BackgroundService.class)){
                 Intent i = new Intent(MainScreenActivity.this, BackgroundService.class);
                 startService(i);
@@ -598,15 +532,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
 
 
         try{
-            //Log.w(TAG, "IN TRY BLOCK");
             Intent intent = getIntent();
             Bundle userBundle = intent.getExtras();
             poiLat = userBundle.getDouble("lat");
             poiLon = userBundle.getDouble("lon");
             Log.w(TAG, "LAT IS " + poiLat);
         }catch (Exception e){
-            //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            //finish();
 //            Log.w(TAG, e.getMessage());
         }
 
@@ -617,7 +548,6 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
             mapController.setCenter(startPoint);
             Toast.makeText(this, "CENTERING", Toast.LENGTH_SHORT).show();
         }
-        //showPOIs();
     }
 
     @Override
@@ -796,13 +726,11 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
 
     @Override
     protected void onDestroy() {
-        Toast.makeText(this, "MAINSCREEN ONDESTROY", Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
 
     @Override
     protected void onStop() {
-        Toast.makeText(this, "MAINSCREEN ONSTOP", Toast.LENGTH_SHORT).show();
         super.onStop();
     }
 }

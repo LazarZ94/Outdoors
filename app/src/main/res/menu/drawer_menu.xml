@@ -27,7 +27,7 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/navRoutes" />
 
-        <item android:id="@+id/navSchedule"
+        <item android:id="@+id/navPlans"
             android:icon="@drawable/ic_launcher_background"
             android:title="@string/navSched" />
 

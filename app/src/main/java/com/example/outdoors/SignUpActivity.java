@@ -265,7 +265,9 @@ public class SignUpActivity extends AppCompatActivity {
     //upis novog korisnika u bazu sa svoim FB UID kao id
     private void addNewUser(String uid){
         ArrayList<String> emptyArr = new ArrayList<>();
-        User user = new User(email,username,fName,lName,phoneNumber, emptyArr, emptyArr, emptyArr, null);
+        ArrayList<Plan> emptyPlan = new ArrayList<>();
+        ArrayList<Invite> emptyInv = new ArrayList<>();
+        User user = new User(email,username,fName,lName,phoneNumber, emptyArr, emptyArr, emptyArr, emptyPlan, emptyInv, null);
         fbdb.getReference("users/" + uid + "/onlineStatus").setValue(true);
         fbdb.getReference("users/" + uid + "/lat").setValue(0.0d);
         fbdb.getReference("users/" + uid + "/lon").setValue(0.0d);

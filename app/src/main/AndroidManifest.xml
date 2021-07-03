@@ -52,6 +52,7 @@
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".MainScreenActivity" />
         <activity android:name=".PlacesActivity"/>
+        <activity android:name=".PlansActivity"/>
         <activity android:name=".LeaderboardActivity"/>
         <activity android:name=".InvitesActivity"/>
         <activity android:name=".SettingsActivity"/>

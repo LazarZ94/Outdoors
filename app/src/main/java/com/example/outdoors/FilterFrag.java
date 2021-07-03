@@ -30,7 +30,6 @@ public class FilterFrag extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
         mCont = getContext();
         View view = inflater.inflate(R.layout.filter_frag, container, false);
 
@@ -53,7 +52,6 @@ public class FilterFrag extends Fragment {
 
         Button confirmButt = (Button) view.findViewById(R.id.filterConfirmButton);
 
-        //userButt.setSelected(true);
 
         rangeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
             int range = 1;
@@ -102,7 +100,6 @@ public class FilterFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 ((MainScreenActivity) getActivity()).setRanges(userRange, poiRange);
-                //closeFragment();
             }
         });
 
@@ -111,7 +108,6 @@ public class FilterFrag extends Fragment {
 
 
     public void closeFragment(){
-
         getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 }

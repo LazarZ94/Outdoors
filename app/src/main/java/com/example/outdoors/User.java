@@ -47,6 +47,8 @@ public class User implements Comparable {
     public ArrayList<String> friends = new ArrayList<>();
     public ArrayList<String> friendRequests = new ArrayList<>();
     public ArrayList<String> sentFriendRequests = new ArrayList<>();
+    public ArrayList<Plan> userPlans = new ArrayList<>();
+    public ArrayList<Invite> planInvites = new ArrayList<>();
     public UserPreferences prefs;
     @Exclude public boolean onlineStatus;
     @Exclude public Bitmap img;
@@ -59,7 +61,8 @@ public class User implements Comparable {
     }
 
     public User(String email, String username, String fName, String lName,
-                String phone, ArrayList<String> friends, ArrayList<String> fReq,  ArrayList<String> sentFR, UserPreferences prefs){
+                String phone, ArrayList<String> friends, ArrayList<String> fReq,  ArrayList<String> sentFR,
+                ArrayList<Plan> userPlans, ArrayList<Invite> planInvites, UserPreferences prefs){
         this.email = email;
         this.username = username;
         this.fName = fName;
@@ -68,6 +71,8 @@ public class User implements Comparable {
         this.friends = new ArrayList<>(friends);
         this.friendRequests = new ArrayList<>(fReq);
         this.sentFriendRequests = new ArrayList<>(sentFR);
+        this.userPlans = new ArrayList<>(userPlans);
+        this.planInvites = new ArrayList<>(planInvites);
         this.prefs = prefs;
         this.onlineStatus = false;
         this.img = null;
@@ -116,6 +121,18 @@ public class User implements Comparable {
 
             }
         });
+    }
+
+    public ArrayList<Plan> getUserPlans(){
+        return this.userPlans;
+    }
+
+    public ArrayList<Invite> getPlanInvites(){
+        return this.planInvites;
+    }
+
+    public void addUserPlan(Plan plan){
+        this.userPlans.add(plan);
     }
 
     public void setAvatar(Bitmap avatar){

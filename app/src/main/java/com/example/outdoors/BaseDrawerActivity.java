@@ -37,12 +37,14 @@ public class BaseDrawerActivity extends AppCompatActivity {
     static final private int FRIEND_LIST = 2;
     static final private int MY_PLACES = 3;
 
-
+    static final private int PLANS = 5;
     static final private int LEADERBOARD = 6;
     static final private int INVITES = 7;
     static final private int SETTINGS = 8;
 
     boolean avatarSet = false;
+
+    protected TextView titleTW;
 
     NavigationView navView;
 
@@ -62,6 +64,10 @@ public class BaseDrawerActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.activityBaseToolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayShowTitleEnabled(true);
+
+        titleTW = (TextView) findViewById(R.id.toolbarTitle);
+//        titleTW.setText("Outdoors");
 
         setTitle("Outdoors");
 
@@ -72,7 +78,6 @@ public class BaseDrawerActivity extends AppCompatActivity {
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
                 if(!avatarSet) {
-                    Log.d("AAAAAAAAAAAAA", "AVATAR = " + currUser.getAvatar());
                     ImageView avatarView = (ImageView) headerView.findViewById(R.id.navHeaderAvatar);
                     if (currUser.getAvatar() != null) {
                         avatarView.setImageBitmap(currUser.getAvatar());
@@ -87,11 +92,6 @@ public class BaseDrawerActivity extends AppCompatActivity {
         headerView = navView.getHeaderView(0);
 
 
-        /*Log.d("AAAAAAAAAAAAA", "AVATAR = " + currUser.getAvatar());
-        ImageView avatarView = (ImageView) headerView.findViewById(R.id.navHeaderAvatar);
-        if(currUser.getAvatar()!=null){
-            avatarView.setImageBitmap(currUser.getAvatar());
-        }*/
 
         TextView navUsername = (TextView) headerView.findViewById(R.id.navHeaderUsername);
         navUsername.setText(currUser.getUsername());
@@ -120,7 +120,10 @@ public class BaseDrawerActivity extends AppCompatActivity {
                         drawer.closeDrawer(GravityCompat.START);
                         break;
 
-
+                    case R.id.navPlans:
+                        selectActivity(PLANS);
+                        drawer.closeDrawer(GravityCompat.START);
+                        break;
                     case R.id.navLeaderboard:
                         selectActivity(LEADERBOARD);
                         drawer.closeDrawer(GravityCompat.START);
@@ -144,15 +147,6 @@ public class BaseDrawerActivity extends AppCompatActivity {
         });
     }
 
-    /*@Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("AAAAAAAAAAAAA", "AVATAR = " + currUser.getAvatar());
-        ImageView avatarView = (ImageView) headerView.findViewById(R.id.navHeaderAvatar);
-        if(currUser.getAvatar()!=null){
-            avatarView.setImageBitmap(currUser.getAvatar());
-        }
-    }*/
 
     private void selectActivity(int selected){
         Intent intent = null;
@@ -182,6 +176,12 @@ public class BaseDrawerActivity extends AppCompatActivity {
                 }
                 break;
 
+            case PLANS:
+                if(!(this instanceof PlansActivity)){
+                    intent = new Intent(getApplicationContext(), PlansActivity.class);
+                }
+                break;
+
             case LEADERBOARD:
                 if(!(this instanceof LeaderboardActivity)){
                     intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
@@ -203,7 +203,8 @@ public class BaseDrawerActivity extends AppCompatActivity {
     }
 
     protected void setTitle(String title){
-        toolbar.setTitle(title);
+//        toolbar.setTitle(title);
+        titleTW.setText(title);
     }
 
 

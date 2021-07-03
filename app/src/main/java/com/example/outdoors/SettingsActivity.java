@@ -75,7 +75,13 @@ public class SettingsActivity extends BaseDrawerActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if(currUser.getPreferences() == null){
+//            userPrefs = new UserPreferences(25, 25, false);
+            currUser.setPreferences(new UserPreferences(25,25,false));
+        }
+
         userPrefs = currUser.getPreferences();
+
         oldPref = userPrefs.getBackgroundService();
 
         if(userPrefs.getBackgroundService()){

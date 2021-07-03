@@ -71,7 +71,9 @@ public class POIFragment extends Fragment {
         View view = inflater.inflate(R.layout.poi_fragment, container, false);
         ImageView imgView = view.findViewById(R.id.imagePOI);
         final EditText descEdit = view.findViewById(R.id.descEditPOI);
+
         Button submit  = view.findViewById(R.id.submitPOI);
+        Button cancel = view.findViewById(R.id.cancelPOI);
 
         if(getArguments() != null){
             img = getArguments().getString("img");
@@ -121,6 +123,13 @@ public class POIFragment extends Fragment {
                         //closeFragment();
                     }
                 });
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                closeFragment();
             }
         });
 

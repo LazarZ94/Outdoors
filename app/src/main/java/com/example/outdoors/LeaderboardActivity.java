@@ -1,5 +1,6 @@
 package com.example.outdoors;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -19,7 +20,6 @@ public class LeaderboardActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main_screen);
 
         FrameLayout contentLayout = (FrameLayout) findViewById(R.id.contentFrame);
         getLayoutInflater().inflate(R.layout.activity_leaderboard, contentLayout);
@@ -37,11 +37,19 @@ public class LeaderboardActivity extends BaseDrawerActivity {
             layout.setOrientation(LinearLayout.HORIZONTAL);
             TextView usrname = new TextView(this);
             TextView points = new TextView(this);
-            User usr = users.get(i);
+            final User usr = users.get(i);
             usrname.setText(usr.getUsername());
             points.setText(String.valueOf(usr.getPoints()));
             layout.addView(usrname);
             layout.addView(points);
+            layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(LeaderboardActivity.this, UserProfileActivity.class);
+                    i.putExtra("userID", userListInst.getUserId(usr));
+                    startActivity(i);
+                }
+            });
             scrollLayout.addView(layout);
         }
 

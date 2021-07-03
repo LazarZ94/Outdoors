@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,26 +42,40 @@ import java.io.File;
 public class PlaceInfoFrag extends Fragment {
     View view;
     POI poi;
+    String poiID;
     User currUser = UserList.getInstance().getCurrentUser();
     String currUserID = UserList.getInstance().getCurrentUserID();
     User user;
+    String poiUserID;
     Bitmap scaledBitmap;
     FirebaseStorage fbs = DBAuth.getInstance().getStorage();
     FirebaseFirestore db = DBAuth.getInstance().getDB();
+
+    String TAG = "POIINFO";
+
+    ImageView imgView;
+    ProgressBar pBar;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.place_info_frag, container,false);
-        ImageView imgView = view.findViewById(R.id.imagePOIInfo);
+        imgView = view.findViewById(R.id.imagePOIInfo);
         TextView descTW = view.findViewById(R.id.descTWPOIInfo);
         TextView usernameTW = view.findViewById(R.id.usernamePOIInfo);
+        pBar = view.findViewById(R.id.poiFragProgressBar);
 
         poi= ((PlacesActivity)getActivity()).getCurrentPOI();
 
+        poiID = ((PlacesActivity)getActivity()).getCurrPOIID();
+
+        poiUserID = ((PlacesActivity)getActivity()).getPOIUserID();
+
         user = UserList.getInstance().getUser(poi.getuID());
 
-        setPic(view, imgView);
+        getPOIPic(poiUserID, poiID);
+
+        pBar.setVisibility(View.VISIBLE);
 
         descTW.setText(poi.getDesc());
         usernameTW.setText(user.getUsername());
@@ -120,29 +135,35 @@ public class PlaceInfoFrag extends Fragment {
         return view;
     }
 
-    private void setPic(View view, ImageView imgView) {
-        String img = ((PlacesActivity)getActivity()).storageDir.getAbsolutePath();
-        img += "/" + poi.getName();
-        //int targetW = view.getWidth();
-        //int targetH = (int) (view.getHeight()*0.4);
+    public void getPOIPic(String poiUser, final String poiID){
+        StorageReference picRef = fbs.getReference().child("images/POI/full/"+poiUser+"/"+poiID);
+        final long maxSize = 7 * 1024 * 1024;
 
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
 
-        BitmapFactory.decodeFile(img, bmOptions);
+        Toast.makeText(getContext(), "Downloading image", Toast.LENGTH_SHORT).show();
 
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
+        picRef.getBytes(maxSize).addOnSuccessListener(new OnSuccessListener<byte[]>(){
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap currPOIImg = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                setPic(currPOIImg, imgView);
+                pBar.setVisibility(View.GONE);
+//                setCurrentPOI(userListInst.getPOI(poiID), bytes);
+            }
+        }).addOnFailureListener(new OnFailureListener(){
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(), "Problem getting file(s).", Toast.LENGTH_SHORT).show();
+                pBar.setVisibility(View.GONE);
+            }
+        });
 
-        //int scaleFactor = Math.max(1, Math.min(photoW/targetW, photoH/targetH));
+    }
 
-        bmOptions.inJustDecodeBounds = false;
-        //bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
+    private void setPic(Bitmap img, ImageView imgView) {
 
-        //Bitmap bitmap = BitmapFactory.decodeFile(img, bmOptions);
-        Bitmap bitmap = ((PlacesActivity)getActivity()).getCurrPOIImg();
-        scaledBitmap = Bitmap.createScaledBitmap(bitmap, 120, 120, false);
-        imgView.setImageBitmap(bitmap);
+        scaledBitmap = Bitmap.createScaledBitmap(img, 120, 120, false);
+        imgView.setImageBitmap(img);
+
     }
 }

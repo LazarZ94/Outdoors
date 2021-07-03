@@ -43,6 +43,7 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
 public class UserList {
@@ -58,6 +59,8 @@ public class UserList {
     private Bitmap currAvatar = null;
     private GoogleSignInClient mGoogleSignInClient;
     private BiMap<String, POI> poiList;
+    private BiMap<String, Plan> planList;
+    private BiMap<String, Plan> planInvites;
     private BiMap<String, User> userList;
     private BiMap<String, Bitmap> userAvatars = HashBiMap.create();
 
@@ -70,6 +73,8 @@ public class UserList {
         fbs = DBAuth.getInstance().getStorage();
         userList = HashBiMap.create();
         poiList = HashBiMap.create();
+        planList = HashBiMap.create();
+        planInvites = HashBiMap.create();
         getAllUsers(null);
     }
 
@@ -82,6 +87,24 @@ public class UserList {
                     onlineUsers.add(user);
         }
         return onlineUsers;
+    }
+
+    public void setPlans(BiMap<String, Plan> plans){
+        this.planList = plans;
+    }
+
+    public void setPlanInvites(BiMap<String, Plan> plans) {this.planInvites = plans; }
+
+    public Plan getPlanInvite(String id){
+        return this.planInvites.get(id);
+    }
+
+//    public ArrayList<Invite> getPlanInvites(){
+//        return this.planInvites;
+//    }
+
+    public Plan getPlan(String id){
+        return planList.get(id);
     }
 
     public ArrayList<POI> getPOIs(){
@@ -282,7 +305,7 @@ public class UserList {
                 updateUI(context, user);
             }
         }else{
-            currentUser = null;
+//            currentUser = null;
         }
     }
 
@@ -329,6 +352,23 @@ public class UserList {
         return false;
     }
 
+    public String getFormatDate(Date date){
+        return padOne("" + date.getDay()) + " " + getMon(date.getMonth()) + " " + date.getYear();
+    }
+
+    public String getFormatTime(Date date){
+        return padOne(""+date.getHours()) + ":" + padOne(""+date.getMinutes());
+    }
+
+    public String padOne(String str){
+        return str.length()>=2 ? str : "0"+str;
+    }
+
+    public String getMon(int i){
+        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        return months[i-1];
+    }
+
 
     private User addNewGoogleUser(FirebaseUser userFB){
         Random rand = new Random();
@@ -341,7 +381,9 @@ public class UserList {
         if(names.length>1)
             lName = names[1];
         ArrayList<String> emptyArr = new ArrayList<>();
-        User user = new User(mail,username,fName,lName, "", emptyArr, emptyArr, emptyArr, null);
+        ArrayList<Plan> emptyPlan = new ArrayList<>();
+        ArrayList<Invite> emptyInv = new ArrayList<>();
+        User user = new User(mail,username,fName,lName, "", emptyArr, emptyArr, emptyArr, emptyPlan, emptyInv, null);
         fbdb.getReference("users/" + uid + "/onlineStatus").setValue(true);
         fbdb.getReference("users/" + uid + "/lat").setValue(0.0d);
         fbdb.getReference("users/" + uid + "/lon").setValue(0.0d);

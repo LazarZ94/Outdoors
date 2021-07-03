@@ -43,9 +43,7 @@ public class PlacesListFrag extends Fragment {
         ArrayList<POI> poiList = ((PlacesActivity)getActivity()).getPOIList();
 
         for(final POI poi : poiList){
-            Log.d("AAAAAAAAAAAAAAAAAAAAAA", String.valueOf(poi));
             TextView tw = new TextView(getContext());
-//            String desc = currUser.POIMetadata.get(poi.getName()).getCustomMetadata("desc") + "AAAAAAA";
             String desc = poi.getDesc();
             tw.setText(desc);
             tw.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 25);
@@ -58,13 +56,11 @@ public class PlacesListFrag extends Fragment {
             scrollLayout.addView(tw);
         }
 
-        Log.d("AAAA", "StorageDIR : " + ((PlacesActivity)getActivity()).storageDir);
 
         return view;
     }
 
     private void showPOI(POI poi){
-        Toast.makeText(getContext(), "Downloading image", Toast.LENGTH_SHORT).show();
-        ((PlacesActivity)getActivity()).getPOIPic(poi.getuID(), poi.getName());
+        ((PlacesActivity)getActivity()).setCurrentPOI(poi);
     }
 }

@@ -40,13 +40,14 @@ public class SentInvFrag extends Fragment {
 
         msg = view.findViewById(R.id.sentInvTVEmpty);
 
-        for(String id : sentInvs){
-            usernames.add(userListInst.getUser(id).getUsername());
-        }
+//        for(String id : sentInvs){
+//            usernames.add(userListInst.getUser(id).getUsername());
+//        }
 
         if(!currUser.sentFriendRequests.isEmpty()) {
             msg.setVisibility(View.GONE);
-            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, SENT_VIEW);
+//            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, SENT_VIEW);
+            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), sentInvs, SENT_VIEW, null);
             recView.setAdapter(recAdapter);
             recView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
             recView.setVisibility(View.VISIBLE);

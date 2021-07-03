@@ -5,21 +5,58 @@
     android:orientation="vertical"
     android:background="#ffffff">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="6"
-        android:orientation="horizontal"
-        android:padding="10dp">
+        android:layout_weight="6">
+
+        <ProgressBar
+            android:id="@+id/poiFragProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/imagePOIInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:contentDescription="POI"
             android:scaleType="centerInside"
-            android:contentDescription="POI"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_weight="6"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:padding="10dp">-->
+
+<!--        <ProgressBar-->
+<!--            android:id="@+id/poiFragProgressBar"-->
+<!--            style="?android:attr/progressBarStyleLarge"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/imagePOIInfo"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:scaleType="centerInside"-->
+<!--            android:contentDescription="POI"/>-->
+
+<!--    </LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"

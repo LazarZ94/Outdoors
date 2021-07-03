@@ -73,9 +73,7 @@ public class LogInActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             if(!task.getResult().isEmpty()) {
                                 for (QueryDocumentSnapshot doc : task.getResult()) {
-                                    Log.d(TAG, doc.getId() + " => " + doc.getData());
                                     User user = doc.toObject(User.class);
-                                    Log.d(TAG, "EMAIL JE " + user.email);
                                     logIn(user.email, pw);
                                 }
                             }else{
