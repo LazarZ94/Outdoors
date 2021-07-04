@@ -16,6 +16,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.okhttp.internal.DiskLruCache;
+
 import java.util.ArrayList;
 
 public class RecInvFrag extends Fragment {
@@ -24,6 +32,9 @@ public class RecInvFrag extends Fragment {
 
     UserList userListInst = UserList.getInstance();
     User currUser = userListInst.getCurrentUser();
+    String currID = userListInst.getCurrentUserID();
+
+    FirebaseFirestore db = DBAuth.getInstance().getDB();
 
     RecyclerView recView;
     TextView msg;
@@ -44,7 +55,27 @@ public class RecInvFrag extends Fragment {
         
         msg = view.findViewById(R.id.recInvTVEmpty);
 
+        db.collection("users").document(currID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>(){
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot doc = task.getResult();
+                            if(doc.exists()){
+                                User user = doc.toObject(User.class);
+                                currUser.setFriendRequests(user.friendRequests);
+                                setupView();
+                            }
+                        }
+                    }
+                });
 
+
+        return view;
+    }
+
+    private void setupView(){
         if(!currUser.friendRequests.isEmpty()) {
             msg.setVisibility(View.GONE);
 //            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, REC_VIEW);
@@ -57,7 +88,5 @@ public class RecInvFrag extends Fragment {
             msg.setText("Nothing here.");
             msg.setVisibility(View.VISIBLE);
         }
-
-        return view;
     }
 }

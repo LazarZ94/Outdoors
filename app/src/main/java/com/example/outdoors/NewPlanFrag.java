@@ -89,14 +89,12 @@ public class NewPlanFrag extends Fragment {
             planID = getArguments().getString("planID");
 //            plan = act.getPlan(planID);
             plan = userListInst.getPlan(planID);
-            Log.w("PLAN FRAG", planID);
-            Log.w("PLAN FRAG", String.valueOf(plan));
         }
 
 
         if (mapController != null) {
             GeoPoint startPoint;
-            mapController.setZoom(16.0);
+            mapController.setZoom(14.0);
             startPoint = plan != null ? new GeoPoint(plan.lat, plan.lon) : new GeoPoint(currUser.lat, currUser.lon);
             mapController.setCenter(startPoint);
         }
@@ -127,6 +125,7 @@ public class NewPlanFrag extends Fragment {
             dateButt.setVisibility(View.GONE);
             timeButt.setVisibility(View.GONE);
             people = plan.confirmed;
+            setPlanMarker(plan.lat, plan.lon);
         }
 
         RecyclerView recView = (RecyclerView) view.findViewById(R.id.newPlanRecView);
@@ -157,6 +156,16 @@ public class NewPlanFrag extends Fragment {
         return view;
     }
 
+    private void setPlanMarker(double lat, double lon){
+        Marker pin = new Marker(map);
+        pin.setId("pin");
+        pin.setPosition(new GeoPoint(lat, lon));
+        pin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        pin.setIcon(getResources().getDrawable(R.drawable.ic_baseline_place_24));
+        map.getOverlays().add(pin);
+        map.invalidate();
+    }
+
     public void getTitle(){
         ((PlansActivity)getActivity()).setPlanTitle(titleET.getText().toString());
     }
@@ -175,13 +184,14 @@ public class NewPlanFrag extends Fragment {
                 double lat = p.getLatitude();
                 double lon = p.getLongitude();
                 removeMarker("pin");
-                Marker pin = new Marker(map);
-                pin.setId("pin");
-                pin.setPosition(new GeoPoint(lat, lon));
-                pin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                pin.setIcon(getResources().getDrawable(R.drawable.ic_baseline_place_24));
-                map.getOverlays().add(pin);
-                map.invalidate();
+//                Marker pin = new Marker(map);
+//                pin.setId("pin");
+//                pin.setPosition(new GeoPoint(lat, lon));
+//                pin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+//                pin.setIcon(getResources().getDrawable(R.drawable.ic_baseline_place_24));
+//                map.getOverlays().add(pin);
+//                map.invalidate();
+                setPlanMarker(lat, lon);
                 ((PlansActivity)getActivity()).setCoords(lat, lon);
                 return false;
             }

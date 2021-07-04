@@ -323,7 +323,7 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
             @Override
             public void run() {
                 int poiCounter = 0;
-                int inviteCounter = 0;
+//                int inviteCounter = 0;
                 while(true){
                     if(stopThread) {
                         Log.d(TAG, "run: stopping thread");
@@ -339,12 +339,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
                             poiCounter = 0;
                             showPOIs();
                         }
-                        if(inviteCounter>5){
-                            inviteCounter = 0;
-//                            checkInvites();
-                        }
+//                        if(inviteCounter>5){
+//                            inviteCounter = 0;
+////                            checkInvites();
+//                        }
                         poiCounter++;
-                        inviteCounter++;
+//                        inviteCounter++;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

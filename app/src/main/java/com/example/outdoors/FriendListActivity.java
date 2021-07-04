@@ -7,6 +7,7 @@ Activity za prikaz liste prijatelja
 
 package com.example.outdoors;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 
 import android.app.Activity;
@@ -25,6 +26,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -33,6 +39,9 @@ public class FriendListActivity extends BaseDrawerActivity {
     private UserList userListInst = UserList.getInstance();
 
     private User currentUser = userListInst.getCurrentUser();
+    String currID = userListInst.getCurrentUserID();
+
+    FirebaseFirestore db = DBAuth.getInstance().getDB();
 
     ArrayList<String> userInvites = new ArrayList();
 
@@ -41,6 +50,7 @@ public class FriendListActivity extends BaseDrawerActivity {
     int mode = 0;
 
     ArrayList<String> excluded;
+    TextView emptyTW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +61,7 @@ public class FriendListActivity extends BaseDrawerActivity {
 
         setTitle(currentUser.getUsername());
 
-        TextView emptyTW = (TextView) findViewById(R.id.friendListEmptyTW);
+        emptyTW = (TextView) findViewById(R.id.friendListEmptyTW);
 
         try{
             Intent intent = getIntent();
@@ -62,6 +72,26 @@ public class FriendListActivity extends BaseDrawerActivity {
             Log.w("FRIENDS ACT", "bundle empty");
         }
 
+        db.collection("users").document(currID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>(){
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot doc = task.getResult();
+                            if(doc.exists()){
+                                User user = doc.toObject(User.class);
+                                currUser.setFriends(user.friends);
+                                setupView();
+                            }
+                        }
+                    }
+                });
+
+
+    }
+
+    private void setupView(){
         Button btButt = (Button) findViewById(R.id.btButton);
 
         LinearLayout toolbarLayout  = (LinearLayout) findViewById(R.id.toolbarItems);

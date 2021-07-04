@@ -54,7 +54,6 @@ public class SettingsActivity extends BaseDrawerActivity {
                 Log.w("oldpref", String.valueOf(oldPref));
                 Log.w("switch", String.valueOf(serviceSwitch.isChecked()));
                 if((oldPref != serviceSwitch.isChecked())){
-                    Log.w("AAAA", "IN IF STATE");
                     if(serviceSwitch.isChecked()){
                         currUser.getPreferences().setBackgroundService(true);
                     }else{

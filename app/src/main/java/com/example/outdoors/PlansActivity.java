@@ -82,20 +82,18 @@ public class PlansActivity extends BaseDrawerActivity {
         toolbarLayout.setPadding(0,15,30,15);
 
         try{
-            Log.w("IN PLANS ACT", "AAA");
             Intent intent = getIntent();
             Bundle userBundle = intent.getExtras();
             planID = userBundle.getString("planID");
-            Log.w("RECEIVED PLAN ID", planID);
         }catch (Exception e){
 //            Log.w("PLANS", "BUNDLE EMPTY");
         }
+
 
         if(planID != null){
             Bundle args = new Bundle();
             args.putString("planID", planID);
             frag.setArguments(args);
-            Log.w("PLANSACT", "SETTIGN FRAG");
             getSupportFragmentManager().beginTransaction().replace(R.id.plansContainer, frag).commit();
         }else{
             emptyTW = (TextView) findViewById(R.id.emptyTW);
@@ -182,7 +180,6 @@ public class PlansActivity extends BaseDrawerActivity {
     }
 
     public Plan getPlan(String id){
-        Log.w("GET PLAN", String.valueOf(planList.size()));
         return planList.get(id);
     }
 

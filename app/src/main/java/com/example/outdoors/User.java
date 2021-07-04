@@ -158,12 +158,24 @@ public class User implements Comparable {
         return friends;
     }
 
+    public void setFriends(ArrayList<String> fr){
+        this.friends = fr;
+    }
+
     public ArrayList<String> getFriendRequests(){
         return friendRequests;
     }
 
+    public void setFriendRequests(ArrayList<String> fReqs){
+        this.friendRequests = fReqs;
+    }
+
     public ArrayList<String> getSentFriendRequests(){
         return sentFriendRequests;
+    }
+
+    public void setSentRequests(ArrayList<String> sentReqs){
+        this.sentFriendRequests = sentReqs;
     }
 
     public String getUsername(){

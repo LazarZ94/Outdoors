@@ -101,11 +101,13 @@ public class UserProfileActivity extends BaseDrawerActivity {
         avatarView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                Toast.makeText(UserProfileActivity.this, "Choose image", Toast.LENGTH_SHORT).show();
-                Intent i = new Intent();
-                i.setType("image/*");
-                i.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(i, "Select Image"), IMAGE_PICKER);
+                if(userID.equals(userListInst.getCurrentUserID())){
+                    Toast.makeText(UserProfileActivity.this, "Choose image", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent();
+                    i.setType("image/*");
+                    i.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(i, "Select Image"), IMAGE_PICKER);
+                }
             }
         });
 

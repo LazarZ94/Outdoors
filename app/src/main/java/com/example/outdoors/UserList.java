@@ -183,7 +183,7 @@ public class UserList {
                                     }
                                     user.setLocationListener(docID);
                                     Log.d(TAG, "EMAIL JE " + user.email);
-                                    setPOIList(user, docID);
+//                                    setPOIList(user, docID);
                                     userList.put(docID, user);
                                 }
                                 Log.d(TAG, "PRE SETIUPDATE USERLIST JE " + userList);
@@ -238,8 +238,6 @@ public class UserList {
     }
 
     private void setPOIList(final User user, String uid){
-        Log.d(TAG, "setPOIList: IN POIIII");
-        //TODO: uzimaj poi listu iz firestore umesto storage
         StorageReference listPOI = fbs.getReference().child("images/POI/full/"+ uid + "/");
         listPOI.listAll()
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
@@ -247,7 +245,7 @@ public class UserList {
                     public void onSuccess(ListResult listResult) {
                         for(StorageReference item : listResult.getItems()){
                             Log.d(TAG, "onSuccess: ITEM" + item);
-                            addPOIMetadata(user, item);
+//                            addPOIMetadata(user, item);
                             user.POIs.add(item);
                         }
                     }

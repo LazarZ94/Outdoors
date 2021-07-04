@@ -12,6 +12,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 
 public class SentInvFrag extends Fragment {
@@ -23,6 +28,9 @@ public class SentInvFrag extends Fragment {
 
     UserList userListInst = UserList.getInstance();
     User currUser = userListInst.getCurrentUser();
+    String currID = userListInst.getCurrentUserID();
+
+    FirebaseFirestore db = DBAuth.getInstance().getDB();
 
     ArrayList<String> sentInvs = currUser.getSentFriendRequests();
 
@@ -40,10 +48,28 @@ public class SentInvFrag extends Fragment {
 
         msg = view.findViewById(R.id.sentInvTVEmpty);
 
-//        for(String id : sentInvs){
-//            usernames.add(userListInst.getUser(id).getUsername());
-//        }
+        db.collection("users").document(currID)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>(){
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot doc = task.getResult();
+                            if(doc.exists()){
+                                User user = doc.toObject(User.class);
+                                currUser.setSentRequests(user.sentFriendRequests);
+                                setupView();
+                            }
+                        }
+                    }
+                });
 
+
+
+        return view;
+    }
+
+    private void setupView(){
         if(!currUser.sentFriendRequests.isEmpty()) {
             msg.setVisibility(View.GONE);
 //            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, SENT_VIEW);
@@ -56,7 +82,5 @@ public class SentInvFrag extends Fragment {
             msg.setText("Nothing here.");
             msg.setVisibility(View.VISIBLE);
         }
-
-        return view;
     }
 }

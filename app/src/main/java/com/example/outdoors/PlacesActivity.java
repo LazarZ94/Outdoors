@@ -95,7 +95,7 @@ public class PlacesActivity extends BaseDrawerActivity {
             poiUserID = userListInst.getCurrentUserID();
         }
 
-        getUserPOIs(poiUserID);
+//        getUserPOIs(poiUserID);
 
 
     }
@@ -103,7 +103,8 @@ public class PlacesActivity extends BaseDrawerActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        getPOIs();
+//        getPOIs();
+        getUserPOIs(poiUserID);
     }
 
     private void getUserPOIs(String userID){
@@ -134,9 +135,7 @@ public class PlacesActivity extends BaseDrawerActivity {
     private void getPOIs(){
         ArrayList<StorageReference> missingPOIs = new ArrayList<>();
         for(StorageReference poi : currUser.POIs){
-            Log.d(TAG, "getPOIs: stDIR" + storageDir);
             String poiPath = storageDir + "/" + poi.getName();
-            Log.d(TAG, "getPOIs: POI PATH" + poiPath);
             File poiLocal = new File(poiPath);
             if(!poiLocal.exists()){
                 missingPOIs.add(poi);
