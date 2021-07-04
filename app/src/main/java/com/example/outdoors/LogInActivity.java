@@ -1,3 +1,10 @@
+/*
+
+Activity za login
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
@@ -12,22 +19,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.w3c.dom.Text;
-
-public class LogIn extends AppCompatActivity {
+public class LogInActivity extends AppCompatActivity {
 
     private static String TAG = "LOG IN ACTIVITY";
 
@@ -73,9 +73,7 @@ public class LogIn extends AppCompatActivity {
                         if(task.isSuccessful()){
                             if(!task.getResult().isEmpty()) {
                                 for (QueryDocumentSnapshot doc : task.getResult()) {
-                                    Log.d(TAG, doc.getId() + " => " + doc.getData());
                                     User user = doc.toObject(User.class);
-                                    Log.d(TAG, "EMAIL JE " + user.email);
                                     logIn(user.email, pw);
                                 }
                             }else{
@@ -85,7 +83,7 @@ public class LogIn extends AppCompatActivity {
                             }
                         }else{
                             Log.d(TAG, "Error getting data" , task.getException());
-                            Toast.makeText(LogIn.this, "Error getting data", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LogInActivity.this, "Error getting data", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -100,14 +98,14 @@ public class LogIn extends AppCompatActivity {
                             Log.d(TAG, "LOG IN SUCCESS ");
                             FirebaseUser user = mAuth.getCurrentUser();
                             UserList inst = UserList.getInstance();
-                            inst.updateUsers(LogIn.this);
+                            inst.updateUsers(LogInActivity.this);
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LogIn.this, "Log In failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LogInActivity.this, "Log In failed", Toast.LENGTH_SHORT).show();
                             TextView pwErr = (TextView) findViewById(R.id.passwordLogInError);
                             String errMsg = "Wrong password";
                             pwErr.setText(errMsg);
-                            UserList.getInstance().updateUI(LogIn.this,null);
+                            UserList.getInstance().updateUI(LogInActivity.this,null);
                         }
                     }
                 });

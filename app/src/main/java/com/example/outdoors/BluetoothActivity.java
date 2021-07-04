@@ -1,3 +1,10 @@
+/*
+
+Klase za upravljanje BT handshake-om
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
@@ -194,10 +201,6 @@ public class BluetoothActivity extends BaseDrawerActivity {
             AcceptThread server = new AcceptThread();
             server.start();
             startActivity(discInt);
-            //LocationManager locMngr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            /*if(!locMngr.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_LOCATION_SERVICE);
-            }*/
             if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(BluetoothActivity.this,
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},

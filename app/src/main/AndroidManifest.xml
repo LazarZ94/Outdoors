@@ -9,7 +9,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -18,16 +24,43 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FriendListActivity"></activity>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <receiver
+            android:name=".ServiceRestartReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="restartservice" />
+                <action android:name="stopservice" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".FriendListActivity" />
         <activity android:name=".BaseDrawerActivity" />
         <activity android:name=".BluetoothActivity" />
-        <activity android:name=".UserProfile" />
-        <activity android:name=".MainScreen" />
+        <activity android:name=".UserProfileActivity" />
+        <activity android:name=".MainScreenActivity" />
+        <activity android:name=".PlacesActivity"/>
+        <activity android:name=".PlansActivity"/>
+        <activity android:name=".LeaderboardActivity"/>
+        <activity android:name=".InvitesActivity"/>
+        <activity android:name=".SettingsActivity"/>
         <activity
-            android:name=".SignUp"
+            android:name=".SignUpActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".LogIn"
+            android:name=".LogInActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -36,6 +69,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".BackgroundService"
+            android:stopWithTask="false"/>
     </application>
 
 </manifest>

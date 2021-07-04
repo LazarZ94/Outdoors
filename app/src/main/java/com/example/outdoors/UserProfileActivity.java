@@ -1,35 +1,41 @@
+/*
+
+Klasa za prikaz korisnickog profila
+
+ */
+
+
 package com.example.outdoors;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 
 import android.content.Intent;
-import android.net.wifi.p2p.WifiP2pManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-public class UserProfile extends BaseDrawerActivity {
+public class UserProfileActivity extends BaseDrawerActivity {
 
     final static String TAG = "USERPROFILE";
 
@@ -40,11 +46,17 @@ public class UserProfile extends BaseDrawerActivity {
     FirebaseFirestore db;
     final String currId = DBAuth.getInstance().getAuth().getCurrentUser().getUid();
 
+    public final int IMAGE_PICKER = 1;
+
     ArrayList<User> onlineUsers;
 
     ArrayList<User> offlineUsers;
 
     final UserList userListInst = UserList.getInstance();
+
+    ImageView avatarView;
+
+    FirebaseStorage storage = DBAuth.getInstance().getStorage();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +83,8 @@ public class UserProfile extends BaseDrawerActivity {
 
         setTitle(user.getUsername());
 
+//        titleTW.setText(user.getUsername());
+
         userFriends = new ArrayList<>();
 
         for(String friendID : user.friends){
@@ -78,6 +92,24 @@ public class UserProfile extends BaseDrawerActivity {
         }
 
         currUser = UserList.getInstance().getCurrentUser();
+
+        avatarView = (ImageView) findViewById(R.id.userProfileAvatar);
+        if(user.getAvatar()!=null){
+            avatarView.setImageBitmap(user.getAvatar());
+        }
+
+        avatarView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if(userID.equals(userListInst.getCurrentUserID())){
+                    Toast.makeText(UserProfileActivity.this, "Choose image", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent();
+                    i.setType("image/*");
+                    i.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(i, "Select Image"), IMAGE_PICKER);
+                }
+            }
+        });
 
 
         final Button addButt = (Button) findViewById(R.id.userProfileAddFriend);
@@ -122,6 +154,7 @@ public class UserProfile extends BaseDrawerActivity {
                             });*/
                     setRequests();
                     addButt.setVisibility(View.GONE);
+                    Toast.makeText(UserProfileActivity.this, "Friend request sent.", Toast.LENGTH_SHORT).show();
                     userListInst.updateUsers(null);
                 }
             }
@@ -160,7 +193,7 @@ public class UserProfile extends BaseDrawerActivity {
                         offlineUsers.add(usr);
                     }
                 }
-                Toast.makeText(UserProfile.this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserProfileActivity.this, "Online users: " + onlineUsers.size(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -169,6 +202,42 @@ public class UserProfile extends BaseDrawerActivity {
 
         friendList.setAdapter(new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, userFriends));
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == IMAGE_PICKER && resultCode == RESULT_OK){
+            if(data != null && data.getData() != null){
+                try {
+                    final Bitmap imgBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+                    StorageReference avatarRef = storage.getReference().child("images/avatars/" + userListInst.getCurrentUserID());
+                    byte[] newAvatar = bArrFromBM(imgBitmap);
+                    UploadTask upTask = avatarRef.putBytes(newAvatar);
+                    upTask.addOnFailureListener(new OnFailureListener(){
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(UserProfileActivity.this, "Problem uploading image!", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener(){
+                        @Override
+                        public void onSuccess(Object o) {
+                            Toast.makeText(UserProfileActivity.this, "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
+                            avatarView.setImageBitmap(imgBitmap);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private byte[] bArrFromBM(Bitmap bm){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Bitmap scaled = Bitmap.createScaledBitmap(bm, 90, 90, true);
+        scaled.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 
     @Override

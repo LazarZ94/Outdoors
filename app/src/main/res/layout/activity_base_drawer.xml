@@ -24,7 +24,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/toolbarTitle"
+                android:textSize="20dp"
+                android:textColor="#fff" />
+
+            <LinearLayout
+                android:id="@+id/toolbarItems"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" />
+
+        </androidx.appcompat.widget.Toolbar>
+
+
 
         <FrameLayout
             android:layout_width="match_parent"

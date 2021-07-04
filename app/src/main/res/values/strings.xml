@@ -27,11 +27,15 @@
     <string name="navFriends">Friends</string>
     <string name="navPlaces">My Places</string>
     <string name="navRoutes">My Routes</string>
-    <string name="navSched">Schedule</string>
+    <string name="navSched">Plans</string>
     <string name="navLeaderboard">Leaderboard</string>
     <string name="navInvites">Invites</string>
+    <string name="navSettings">Settings</string>
     <string name="navLogOut">Log Out</string>
 
     <string name="navDrawerOpen">Open navigation drawer</string>
     <string name="navDrawerClose">Close navigation drawer</string>
+
+    <string name="descTWPOI">Description:</string>
+    <string name="submit">Submit</string>
 </resources>
