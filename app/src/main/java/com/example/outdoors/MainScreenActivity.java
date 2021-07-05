@@ -63,17 +63,22 @@ import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -108,6 +113,8 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
     private FirebaseDatabase fbdb = DBAuth.getInstance().getFBDB();
 
     private FirebaseStorage fbs = DBAuth.getInstance().getStorage();
+
+    private FirebaseUser currUserFB = mAuth.getCurrentUser();
 
     boolean doubleTap = false;
 
@@ -148,6 +155,8 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
     boolean serviceToggle;
 
     private volatile boolean stopThread = false;
+
+    ArrayList<POI> poiUpdates = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -265,10 +274,15 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
     public void setRanges(int uR, int pR){
         userRange = uR;
         poiRange = pR;
-        currUser.getPreferences().setUserRange(uR);
-        currUser.getPreferences().setPOIRange(pR);
+        UserPreferences prefs = currUser.getPreferences();
+        if(prefs != null){
+            prefs.setUserRange(uR);
+            prefs.setPOIRange(pR);
+        }else{
+           prefs = new UserPreferences(uR, pR, false);
+        }
         DocumentReference usrRef = db.collection("users").document(currId);
-        usrRef.update("prefs", currUser.getPreferences());
+        usrRef.update("prefs", prefs);
         fab.setVisibility(View.VISIBLE);
         filterFrag.closeFragment();
         filterAdd = false;
@@ -337,7 +351,8 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
                         if(poiCounter >2){
                             Log.d(TAG, "run: updating pois ... POICOUNTER = " + poiCounter);
                             poiCounter = 0;
-                            showPOIs();
+                            updatePOIs();
+//                            showPOIs();
                         }
 //                        if(inviteCounter>5){
 //                            inviteCounter = 0;
@@ -351,6 +366,12 @@ public class MainScreenActivity extends BaseDrawerActivity implements LocationLi
                 }
             }
         }).start();
+    }
+
+    private void updatePOIs(){
+
+        userListInst.getPOIs(currUserFB, this, userListInst.UPDATE_POI);
+        showPOIs();
     }
 
 

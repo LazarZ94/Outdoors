@@ -39,7 +39,7 @@ public class RecInvFrag extends Fragment {
     RecyclerView recView;
     TextView msg;
 
-    ArrayList<String> recInvs = currUser.getFriendRequests();
+//    ArrayList<String> recInvs = currUser.getFriendRequests();
 
     ArrayList<String> usernames = new ArrayList<>();
     int avatar = R.drawable.ic_launcher_foreground;
@@ -79,7 +79,7 @@ public class RecInvFrag extends Fragment {
         if(!currUser.friendRequests.isEmpty()) {
             msg.setVisibility(View.GONE);
 //            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, REC_VIEW);
-            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), recInvs, REC_VIEW, null);
+            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), currUser.getFriendRequests(), REC_VIEW, null);
             recView.setAdapter(recAdapter);
             recView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
             recView.setVisibility(View.VISIBLE);

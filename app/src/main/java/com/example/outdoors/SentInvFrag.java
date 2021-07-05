@@ -32,7 +32,7 @@ public class SentInvFrag extends Fragment {
 
     FirebaseFirestore db = DBAuth.getInstance().getDB();
 
-    ArrayList<String> sentInvs = currUser.getSentFriendRequests();
+//    ArrayList<String> sentInvs = currUser.getSentFriendRequests();
 
     ArrayList<String> usernames = new ArrayList<>();
     int avatar = R.drawable.ic_launcher_foreground;
@@ -73,7 +73,7 @@ public class SentInvFrag extends Fragment {
         if(!currUser.sentFriendRequests.isEmpty()) {
             msg.setVisibility(View.GONE);
 //            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), usernames, avatar, SENT_VIEW);
-            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), sentInvs, SENT_VIEW, null);
+            RecViewAdapter recAdapter = new RecViewAdapter(getActivity().getApplicationContext(), currUser.getSentFriendRequests(), SENT_VIEW, null);
             recView.setAdapter(recAdapter);
             recView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
             recView.setVisibility(View.VISIBLE);
