@@ -50,6 +50,9 @@ public class UserList {
 
     private static String TAG = "USER LIST";
 
+    public final int GET_POI = 0;
+    public final int UPDATE_POI = 1;
+
     private FirebaseAuth mAuth;
     private FirebaseUser currentUserFB;
     private User currentUser = null;
@@ -110,6 +113,15 @@ public class UserList {
     public ArrayList<POI> getPOIs(){
         ArrayList<POI> pois = new ArrayList<>(poiList.values());
         return pois;
+    }
+
+    public void addPOI(String id, POI poi){
+        poiList.put(id, poi);
+    }
+
+    public ArrayList<String> getPOIKeys(){
+        ArrayList<String> poiKeys = new ArrayList<>(poiList.inverse().values());
+        return poiKeys;
     }
 
     public POI getPOI(String poiName){
@@ -187,7 +199,7 @@ public class UserList {
                                     userList.put(docID, user);
                                 }
                                 Log.d(TAG, "PRE SETIUPDATE USERLIST JE " + userList);
-                                getPOIs(mAuth.getCurrentUser(), context);
+                                getPOIs(mAuth.getCurrentUser(), context, GET_POI);
                                 //setUserAndUpdate(mAuth.getCurrentUser(), context);
                                 Log.d(TAG, "BROJ KORISNIKA JE " + userList.size());
                             }
@@ -198,7 +210,7 @@ public class UserList {
                 });
     }
 
-    private void getPOIs(final FirebaseUser FBuser, final AppCompatActivity context){
+    public void getPOIs(final FirebaseUser FBuser, final AppCompatActivity context, final int mode){
         db.collection("POI")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>(){
@@ -213,17 +225,18 @@ public class UserList {
                                 poiList.put(docID, poi);
                             }
                         }
-                        setUserAndUpdate(FBuser, context);
+                        if(mode==GET_POI){
+                            setUserAndUpdate(FBuser, context);
+                        }
                     }
                 });
     }
 
-    private void setThumb(final POI poi, StorageReference path){
+    public void setThumb(final POI poi, StorageReference path){
         final long mb = 1024 * 1024;
         path.getBytes(mb).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Log.d(TAG, "AAAAAAAAAAAAAAAAA SET THUMB");
                 poi.setThumb(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
             }
         }).addOnFailureListener(new OnFailureListener() {

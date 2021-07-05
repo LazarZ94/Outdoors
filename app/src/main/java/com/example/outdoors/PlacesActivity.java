@@ -101,8 +101,8 @@ public class PlacesActivity extends BaseDrawerActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
 //        getPOIs();
         getUserPOIs(poiUserID);
     }
